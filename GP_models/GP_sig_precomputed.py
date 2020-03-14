@@ -122,7 +122,7 @@ class GP():
 
     def __init__(self, X, Y, l_init, var_init, noise_init, param_list, discretization_level,dtype=torch.float64,
                  device=torch.device("cpu")):
-
+        
         self.device = device
         self.dtype = dtype
         # constants (except K)
@@ -132,7 +132,7 @@ class GP():
         self.d = discretization_level
 
         if device==torch.device('cuda'):
-            self.training_data = self.training_data.cuda()
+          
             self.Y = self.Y.cuda()
 
         self.jitter = 1e-6 * torch.ones(1, dtype=self.dtype, device=self.device)
@@ -184,9 +184,9 @@ class GP():
 
         diag = torch.diag(K)
         dist = -2. * K + diag.repeat(K.shape[0], 1) + diag[:, None].repeat(1, K.shape[1])
-
+        
         K_RBF = torch.exp(-0.5 * dist / (self.transform_softplus(self.lengthscale) ** 2))
-
+        
         return K_RBF
 
     def get_K_RBF_Sig_dummy(self, indices1, indices2=None):
@@ -194,7 +194,7 @@ class GP():
         if indices2 is None:
             indices2 = indices1
 
-        K = torch.zeros((len(indices1), len(indices2)),dtype=self.dtype)
+        K = torch.zeros((len(indices1), len(indices2)),dtype=self.dtype,device=self.device)
 
         for i in range(len(indices1)):
             for j in range(len(indices2)):
@@ -229,7 +229,7 @@ class GP():
             return K
 
     def obj_RBF(self):
-
+        
         K = self.transform_softplus(self.variance)*self.get_K_RBF_Sig(self.K)
 
         K0 = K + self.transform_softplus(self.noise_obs,1e-4) * torch.eye(K.shape[0], dtype=self.dtype,
