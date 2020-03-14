@@ -117,7 +117,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
 
                 if return_norms:
                     sig_after = iisignature.sig(X[bag][i], level_sig)
-                    
+
                     norms_after = get_norm_level_sig(sig_after, item.shape[1], level_sig)
                     items_after.append(np.sum(norms_after))
 
@@ -125,7 +125,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
             bags_before.append(np.mean(items_before))
             bags_after.append(np.mean(items_after))
 
-        sig = iisgignature.sig(X[bag],level_sig)
+        sig = iisiggnature.sig(X[bag],level_sig)
 
         expected_sig.append(np.mean(np.array(sig),axis=0))
     if return_norms:
