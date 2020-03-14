@@ -54,7 +54,8 @@ def train(model, training_iter, RBF=False, plot=False):
         optimizer.zero_grad()
         loss.backward()
         losses.append(loss)
-        if i > 100 and np.abs(losses[i].detach().numpy() - losses[i - 1].detach().numpy()) < 1e-5:
+
+        if i > 100 and np.abs(losses[i].cpu().detach().numpy() - losses[i - 1].cpu().detach().numpy()) < 1e-5:
             # print(np.abs(losses[i].detach().numpy()-losses[i-1].detach().numpy()))
             if plot:
                 already_plot = True
@@ -67,7 +68,7 @@ def train(model, training_iter, RBF=False, plot=False):
             break
         optimizer.step()
     if plot and not already_plot:
-        plt.plot(losses)
+        plt.plot(losses.cpu().detach().numpy())
         plt.show()
 
 
