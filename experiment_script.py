@@ -3,7 +3,7 @@ import numpy as np
 import utils
 import experiments
 import signature_features
-import ellipsis
+from data_generator import ellipsis
 import pickle
 
 def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100),spec_param = {'a':[1.,3.], 'b':[1.,3.]}):
