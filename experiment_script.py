@@ -5,6 +5,7 @@ import experiments
 import signature_features
 from data_generators import ellipsis
 import pickle
+import pandas as pd
 
 def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100),spec_param = {'a':[1.,3.], 'b':[1.,3.]}):
 
