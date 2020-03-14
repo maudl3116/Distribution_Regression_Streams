@@ -2,7 +2,7 @@ import GP_models.GP_sig_precomputed as GP_sig
 import GP_models.GP_classic as GP_naive
 from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
-import signatory
+#import signatory
 from scipy.optimize import brentq as brentq
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
