@@ -68,8 +68,8 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
     # x_train is of shape N_bags x N_items x time x dim
     # changed into N_bags x time x dim x N_items
 
-    x_train = torch.tensor(x_train, dtype=torch.float64).transpose(1, 2)
-    x_test = torch.tensor(x_test, dtype=torch.float64).transpose(1, 2)
+    x_train = torch.tensor(x_train, dtype=torch.float64,device=device).transpose(1, 2)
+    x_test = torch.tensor(x_test, dtype=torch.float64,device=device).transpose(1, 2)
 
 
     model = GP_naive.GP(x_train, torch.tensor(y_train, dtype=torch.float64), param_init[0], param_init[1],param_init[2],
