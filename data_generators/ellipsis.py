@@ -9,7 +9,7 @@ class Ellipsis():
     # parametrix equation: (x,y) = (acos(t),bsin(t))  t in [0,2pi]
 
     def __init__(self):
-        print('hi')
+      
         self.paths = None
         self.labels = None
 
