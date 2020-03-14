@@ -9,7 +9,7 @@ import time
 import scipy
 import math
 from tqdm import tqdm_notebook as tqdm
-from tqdm.notebook import trange, tqdm
+#from tqdm.notebook import trange, tqdm
 import math
 
 
