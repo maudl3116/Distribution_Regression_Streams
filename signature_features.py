@@ -106,7 +106,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
             if ilya_rescale:
                 sig = iisignature.sig(item, level_sig)
 
-                norms = get_norm_level_sig(sig[0].numpy(), item.shape[1], level_sig)
+                norms = get_norm_level_sig(sig, item.shape[1], level_sig)
                 psi = psi_tilde(np.sum(norms),M,a)
 
                 lambda_ = brentq(poly,0, 10000, args=(psi, norms,level_sig))
@@ -117,7 +117,8 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
 
                 if return_norms:
                     sig_after = iisignature.sig(X[bag][i], level_sig)
-                    norms_after = get_norm_level_sig(sig_after[0].numpy(), item.shape[1], level_sig)
+                    
+                    norms_after = get_norm_level_sig(sig_after, item.shape[1], level_sig)
                     items_after.append(np.sum(norms_after))
 
         if return_norms:
