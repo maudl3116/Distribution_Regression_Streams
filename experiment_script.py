@@ -45,7 +45,7 @@ def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100)
                                                                        a=1, ilya_rescale=True, return_norms=False)
             K_precomputed = experiments.precompute_K(expected_pathwise_sig)
             train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 = experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices, RBF=True,
-                                                         plot=True)
+                                                         plot=False)
 
 
             ''' STORE THE RESULTS '''
