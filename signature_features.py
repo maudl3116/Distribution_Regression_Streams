@@ -104,7 +104,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
         #go through each element of the bag to find its scaling:
         for i,item in enumerate(X[bag]):
             if ilya_rescale:
-                sig = signatory.signature(torch.tensor(item[None,:]), level_sig)
+                sig = iisignature.sig(item, level_sig)
 
                 norms = get_norm_level_sig(sig[0].numpy(), item.shape[1], level_sig)
                 psi = psi_tilde(np.sum(norms),M,a)
@@ -116,7 +116,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
                 X[bag][i]=X[bag][i]*lambda_
 
                 if return_norms:
-                    sig_after = signatory.signature(torch.tensor(X[bag][i][None, :]), level_sig)
+                    sig_after = iisignature.sig(X[bag][i], level_sig)
                     norms_after = get_norm_level_sig(sig_after[0].numpy(), item.shape[1], level_sig)
                     items_after.append(np.sum(norms_after))
 
@@ -124,7 +124,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
             bags_before.append(np.mean(items_before))
             bags_after.append(np.mean(items_after))
 
-        sig = signatory.signature(torch.tensor(X[bag]),level_sig)
+        sig = iisgignature.sig(X[bag],level_sig)
 
         expected_sig.append(np.mean(np.array(sig),axis=0))
     if return_norms:
