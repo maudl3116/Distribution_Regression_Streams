@@ -42,7 +42,7 @@ def plot_marginal_log_lik(model):
     plt.ylabel(r'$\sigma_n^2$')
     plt.show()
 
-def train(model, training_iter, RBF=False, plot=False):
+def train(model, training_iter, plot=False):
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False

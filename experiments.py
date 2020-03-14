@@ -99,7 +99,7 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
     #plt.show()
     return RMSE_train, RMSE_test
 
-def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,plot=False):
+def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,plot=False,device=torch.device("cpu")):
 
     if RBF:
         model = GP_sig.GP(np.zeros(int(len(train_index))), None, 0, 0, 0,['lengthscale', 'variance', 'noise'], 0)
@@ -108,7 +108,7 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,
 
     y_train, y_test = y[train_index], y[test_index]
 
-    model.Y = torch.tensor(y_train, dtype=torch.float64)
+    model.Y = torch.tensor(y_train, dtype=torch.float64,device=device)
 
     K = GP_sig.get_K(K_precomputed, train_index)
     K_s = GP_sig.get_K(K_precomputed, train_index, test_index)

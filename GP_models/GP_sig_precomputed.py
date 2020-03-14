@@ -61,7 +61,7 @@ def train(model,training_iter,RBF=False,plot=False):
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
-    for i in trange(training_iter):
+    for i in tqdm(np.arange(training_iter)):
         # Zero gradients from previous iteration
         # Output from model
         # Calc loss and backprop gradients
@@ -72,7 +72,7 @@ def train(model,training_iter,RBF=False,plot=False):
         optimizer.zero_grad()
         loss.backward()
         losses.append(loss)
-        if i > 300 and np.abs(losses[i].detach().numpy() - losses[i - 1].detach().numpy()) < 1e-5:
+        if i > 300 and np.abs(losses[i].cpu().detach().numpy() - losses[i - 1].cpu().detach().numpy()) < 1e-5:
 
             # print(np.abs(losses[i].detach().numpy()-losses[i-1].detach().numpy()))
             if plot:
@@ -85,9 +85,8 @@ def train(model,training_iter,RBF=False,plot=False):
             break
         optimizer.step()
     if plot and not already_plot:
-        plt.plot(losses)
+        plt.plot(losses.cpu().detach().numpy())
         plt.show()
-
 
 
 def plot_marginal_log_lik(model):
