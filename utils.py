@@ -17,9 +17,9 @@ def split_standardize(y,data,standardized=True,method = 'standard'):
         #indices = list(indices[:50]) + list(indices[150:]) + list(indices[50:150])
         data = np.array([data[i].copy() for i in indices])
 
-        train, test, _, _ = train_test_split(np.arange(len(y)), np.array(y), shuffle=False, test_size=1./4)
+        train, test, _, _ = train_test_split(np.arange(len(y)), np.array(y), shuffle=False, test_size=1./3)
     elif method == 'standard':
-        train, test, _, _ = train_test_split(np.arange(len(y)), np.array(y), shuffle=True, test_size=1. / 4,
+        train, test, _, _ = train_test_split(np.arange(len(y)), np.array(y), shuffle=True, test_size=1. /3,
                                              random_state=0)
     elif method == 'stratify':
         bins = np.linspace(-0.01+min(y[:,0]), max(y[:,0])+0.01, 5)
