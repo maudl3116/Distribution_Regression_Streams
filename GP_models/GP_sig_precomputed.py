@@ -295,7 +295,7 @@ class GP():
             K = self.transform_softplus(self.variance) * self.K.data
         K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype)
 
-        L = torch.cholesky(K0+ torch.eye(K.shape[0], dtype=self.dtype) * self.jitter)
+        L = torch.cholesky(K0)
 
         # Compute the mean at our test points
         if RBF:
