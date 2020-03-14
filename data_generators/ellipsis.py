@@ -151,7 +151,7 @@ class Ellipsis():
         colors = sns.color_palette("hls", N*N)
 
         order = np.argsort(self.labels[:,0])
-        samples = np.arange(0,len(order),int(self.N_bags/(N*N)))
+        samples = np.arange(0,len(order),int(self.N_bags/(N**2)))
 
 
         for i in range(len(samples)):
@@ -164,15 +164,16 @@ class Ellipsis():
         plt.show()
 
     def plot_subsampled_paths(self,N = 3, N_items=5):
-
+    
         sns.set(font_scale=1)
         fig, ax = plt.subplots(N, N, figsize=(10, 10))
         ax = ax.ravel()
         colors = sns.color_palette("hls", N*N)
 
         order = np.argsort(self.labels[:,0])
-        samples = np.arange(0,len(order),int(self.N_bags/N*N))
-
+        samples = np.arange(0,len(order),int(self.N_bags/N**2))
+       
+        
         for i in range(N*N):
 
             for item in range(N_items):

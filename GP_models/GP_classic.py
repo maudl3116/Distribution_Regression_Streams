@@ -16,12 +16,8 @@ from matplotlib.pyplot import imshow, show, colorbar
 
 def plot_marginal_log_lik(model):
 
-    lengthscales = torch.linspace(-10,10,10)
-    obs_noises = torch.linspace(-10,0,10)
-
-    print(model.transform_softplus(lengthscales)**2)
-    print(model.transform_softplus(obs_noises,1e-4))
-
+    lengthscales = torch.linspace(-20,5,30)
+    obs_noises = torch.linspace(-10,1,30)
     loss = np.zeros((len(obs_noises),len(lengthscales)))
 
     for i,l in enumerate(lengthscales):
@@ -43,6 +39,10 @@ def plot_marginal_log_lik(model):
     plt.show()
 
 def train(model, training_iter, plot=False):
+
+    print('transf. var',model.transform_softplus(model.variance))
+    print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
+    print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
@@ -63,12 +63,14 @@ def train(model, training_iter, plot=False):
                 plt.xlabel('epoch')
                 plt.ylabel('negative marginal log likelihood')
                 plt.show()
-                print('lengtshcale',model.lengthscale)
-                print('noise_obs', model.noise_obs)
+                print('transf. var',model.transform_softplus(model.variance))
+                print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
+                print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
             break
         optimizer.step()
     if plot and not already_plot:
-        plt.plot(losses.cpu().detach().numpy())
+       
+        plt.plot([e[0].cpu().detach().numpy() for e in losses])
         plt.show()
 
 
