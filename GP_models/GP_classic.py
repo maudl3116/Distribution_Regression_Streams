@@ -175,7 +175,7 @@ class GP():
 
         K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype,device=self.device)
 
-        L = torch.cholesky(K0 + torch.eye(K.shape[0], dtype=self.dtype) * self.jitter)
+        L = torch.cholesky(K0 + torch.eye(K.shape[0], dtype=self.dtype,device=self.device) * self.jitter)
 
         # Compute the mean at our test points
 
@@ -192,4 +192,4 @@ class GP():
         s2 = torch.diag(K_ss) - torch.sum(Lk ** 2, axis=0)
         stdv_test = 2 * torch.sqrt(s2 + self.transform_softplus(self.noise_obs, 1e-4))
 
-        return mu_test.detach().numpy(), stdv_test.detach().numpy()
+        return mu_test.cpu().detach().numpy(), stdv_test.cpu().detach().numpy()
