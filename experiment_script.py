@@ -13,10 +13,14 @@ def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100)
     # in this experiment, we evaluate the robustness of two regression models to the position noise of the ellipsis.
     example = ellipsis.Ellipsis()
 
-    df_train_r2 = pd.DataFrame(index=N_MC * ['train_r2'], columns=noise_pos)
-    df_train_rmse = pd.DataFrame(index=N_MC * ['train_rmse'], columns=noise_pos)
-    df_test_r2 = pd.DataFrame(index=N_MC * ['test_r2'], columns=noise_pos)
-    df_test_rmse = pd.DataFrame(index=N_MC * ['test_rmse'], columns=noise_pos)
+    df_train_RBF_r2 = pd.DataFrame(index=N_MC * ['train_RBF_r2'], columns=noise_pos)
+    df_train_RBF_rmse = pd.DataFrame(index=N_MC * ['train_RBF_rmse'], columns=noise_pos)
+    df_test_RBF_r2 = pd.DataFrame(index=N_MC * ['test_RBF_r2'], columns=noise_pos)
+    df_test_RBF_rmse = pd.DataFrame(index=N_MC * ['test_RBF_rmse'], columns=noise_pos)
+    df_train_Sig_r2 = pd.DataFrame(index=N_MC * ['train_Sig_r2'], columns=noise_pos)
+    df_train_Sig_rmse = pd.DataFrame(index=N_MC * ['train_Sig_rmse'], columns=noise_pos)
+    df_test_Sig_r2 = pd.DataFrame(index=N_MC * ['test_Sig_r2'], columns=noise_pos)
+    df_test_Sig_rmse = pd.DataFrame(index=N_MC * ['test_Sig_rmse'], columns=noise_pos)
 
     for i in range(N_MC):
         for j,param in enumerate(noise_pos):
