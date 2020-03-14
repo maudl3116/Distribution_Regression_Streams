@@ -51,7 +51,7 @@ def loss_sig(K_precomputed, y, train_index, test_index):
 
 
 
-def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],plot=False):
+def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],plot=False,device=torch.device("cpu")):
 
 
     y_train, y_test = y[train_index], y[test_index]
@@ -73,7 +73,7 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
 
 
     model = GP_naive.GP(x_train, torch.tensor(y_train, dtype=torch.float64), param_init[0], param_init[1],param_init[2],
-                            ['lengthscale', 'variance', 'noise'],ARD=ARD)
+                            ['lengthscale', 'variance', 'noise'],ARD=ARD,device=device)
 
     GP_naive.train(model, 1000, plot=plot)
 

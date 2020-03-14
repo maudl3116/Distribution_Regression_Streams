@@ -79,9 +79,14 @@ class GP():
         self.device = device
         self.dtype = dtype
         # constants (except K)
+
         self.Y = Y
 
         self.training_data = X
+
+        if device==torch.device('cuda'):
+            self.training_data = self.training_data.cuda()
+            self.Y = self.Y.cuda()
 
         self.n, self.n_items = X.shape[0], X.shape[2]
 
@@ -113,12 +118,6 @@ class GP():
         else:
             self.noise_obs = noise_init * torch.ones(1, dtype=self.dtype, device=self.device)
 
-
-    def reinitialize(self):
-        self.variance.data = torch.tensor([0.0], dtype=self.dtype)
-        self.lengthscale.data = torch.tensor([0.0], dtype=self.dtype)
-        self.noise_obs.data = torch.tensor([0.0], dtype=self.dtype)
-        self.mean_constant.data = torch.tensor([0.0], dtype=self.dtype)
 
     def transform_softplus(self, input, min=0.):
         return torch.log(1. + torch.exp(input)) + min
@@ -161,7 +160,7 @@ class GP():
         L = torch.cholesky(K0)
 
         logdetK0 = 2. * torch.sum(torch.log(torch.diag(L)))
-        Lk = torch.triangular_solve(self.Y - self.mean_constant * torch.ones_like(self.Y), L, upper=False)[0]
+        Lk = torch.triangular_solve(self.Y - self.mean_constant * torch.ones_like(self.Y,dtype=self.dtype,device=self.device), L, upper=False)[0]
         ytKy = torch.mm(Lk.t(), Lk)
 
         ml = -0.5 * logdetK0 - 0.5 * ytKy - 0.5 * math.log(2. * math.pi) * self.n
@@ -173,7 +172,7 @@ class GP():
 
         K = self.transform_softplus(self.variance) * self.K_eval_full(X_train)
 
-        K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype)
+        K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype,device=self.device)
 
         L = torch.cholesky(K0 + torch.eye(K.shape[0], dtype=self.dtype) * self.jitter)
 
@@ -183,9 +182,9 @@ class GP():
         K_ss = self.transform_softplus(self.variance) * self.K_eval_full(X_test,X_test)
 
         Lk = torch.triangular_solve(K_s, L, upper=False)[0]
-        Ly = torch.triangular_solve(self.Y - self.mean_constant * torch.ones_like(self.Y, dtype=self.dtype), L, upper=False)[0]
+        Ly = torch.triangular_solve(self.Y - self.mean_constant * torch.ones_like(self.Y, dtype=self.dtype,device=self.device), L, upper=False)[0]
 
-        mu_test = self.mean_constant * torch.ones((K_ss.shape[0], 1),dtype=self.dtype) + torch.mm(Lk.t(), Ly)
+        mu_test = self.mean_constant * torch.ones((K_ss.shape[0], 1),dtype=self.dtype,device=self.device) + torch.mm(Lk.t(), Ly)
 
         # Comoute the standard devaitoin so we can plot it
 
