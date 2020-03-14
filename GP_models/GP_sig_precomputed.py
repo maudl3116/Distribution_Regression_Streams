@@ -8,7 +8,6 @@ from scipy.integrate import odeint
 import time
 import scipy
 import math
-from Signature_Kernel import expectedSigKernel as expectedSigKernel
 from tqdm import tqdm_notebook as tqdm
 from tqdm.notebook import trange, tqdm
 import math
