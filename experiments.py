@@ -79,8 +79,10 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
 
     mu_test, stdv_test = model.predict(x_train, x_test)
     mu_train, stdv_train = model.predict(x_train, x_train)
-    RMSE_train = compute_r2(y_train[:, 0], mu_train[:, 0])
-    RMSE_test = compute_r2(y_test[:, 0], mu_test[:, 0])
+    R2_train = compute_r2(y_train[:, 0], mu_train[:, 0])
+    R2_test = compute_r2(y_test[:, 0], mu_test[:, 0])
+    RMSE_train = compute_rmse(y_train[:, 0], mu_train[:, 0])
+    RMSE_test = compute_rmse(y_test[:, 0], mu_test[:, 0])
 
     #fig, axs = plt.subplots(1, 1, figsize=(15, 7))
     # ax = plt.figure(figsize=(25, 7))
@@ -97,7 +99,8 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
     #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train, y_test[:, 0], mu_test[:, 0],
     #                                    stdv_test)
     #plt.show()
-    return RMSE_train, RMSE_test
+
+    return RMSE_train, R2_train, RMSE_test, R2_test
 
 def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,plot=False,device=torch.device("cpu")):
     y_train, y_test = y[train_index], y[test_index]
@@ -129,9 +132,11 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,
         mu_test, stdv_test = model.dummy_predict(K_s, K_ss, RBF=RBF)
         mu_train, stdv_train = model.dummy_predict(K, K, RBF=RBF)
 
-    RMSE_train = compute_r2(y_train[:, 0], mu_train[:, 0])
+    R2_train = compute_r2(y_train[:, 0], mu_train[:, 0])
+    RMSE_train = compute_rmse(y_train[:, 0], mu_train[:, 0])
 
-    RMSE_test = compute_r2(y_test[:, 0], mu_test[:, 0])
+    R2_test = compute_r2(y_test[:, 0], mu_test[:, 0])
+    RMSE_test = compute_rmse(y_test[:, 0], mu_test[:, 0])
 
 
     #ax = plt.figure(figsize=(25, 7))
@@ -147,7 +152,7 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,
     #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train,y_test[:, 0], mu_test[:, 0], stdv_test)
     #plt.show()
 
-    return RMSE_train, RMSE_test
+    return RMSE_train, R2_train, RMSE_test, R2_test
 
 
 def plot_fit(ax, y_, pred, low=None, up=None, std=None, sklearn=False):
@@ -192,7 +197,7 @@ def plot_fit(ax, y_, pred, low=None, up=None, std=None, sklearn=False):
              transform=ax.transAxes, fontsize=16)
 
 
-def compute_RMSE(y_, pred):
+def compute_rmse(y_, pred):
     order = np.argsort(y_)
     return np.sqrt(np.mean((y_[order] - pred[order]) ** 2))
 
