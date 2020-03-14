@@ -46,7 +46,7 @@ def train(model, training_iter, RBF=False, plot=False):
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
-    for i in trange(training_iter):
+    for i in tqdm(np.arange(training_iter)):
         # Zero gradients from previous iteration
         # Output from model
         # Calc loss and backprop gradients
