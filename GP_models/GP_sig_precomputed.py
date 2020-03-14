@@ -132,6 +132,10 @@ class GP():
         self.n = len(X)
         self.d = discretization_level
 
+        if device==torch.device('cuda'):
+            self.training_data = self.training_data.cuda()
+            self.Y = self.Y.cuda()
+
         self.jitter = 1e-6 * torch.ones(1, dtype=self.dtype, device=self.device)
 
         self.params = []
@@ -170,11 +174,6 @@ class GP():
         self.variance_logger.append(self.variance.data)
         self.noiseobs_logger.append(self.noise_obs.data)
 
-    def reinitialize(self):
-        self.variance.data = torch.tensor([0.0],dtype=self.dtype)
-        self.lengthscale.data = torch.tensor([0.0], dtype=self.dtype)
-        self.noise_obs.data = torch.tensor([0.0],dtype=self.dtype)
-        self.mean_constant.data = torch.tensor([0.0],dtype=self.dtype)
 
     def transform_softplus(self,input,min=0.):
         return torch.log(1.+torch.exp(input))+min
@@ -270,7 +269,7 @@ class GP():
 
         # Apply the kernel function to our training points
         K = self.transform_softplus(self.variance)*self.K.data
-        L = np.linalg.cholesky(K.detach().numpy() + self.transform_softplus(self.noise_obs,1e-4).detach().numpy() * np.eye(self.n))
+        L = np.linalg.cholesky(K.detach().numpy() + self.transform_softplus(self.noise_obs,1e-4).detach().numpy() * np.eye(self.n,dtype=self.dtype,device=self.device))
 
         # Compute the mean at our test points
         if is_same_train:
@@ -279,12 +278,12 @@ class GP():
         else:
             K_s = self.transform_softplus(self.variance)*self.K_eval_full(self.training_data, test_data)
             K_ss = self.transform_softplus(self.variance)*self.K_eval_full( test_data,test_data)
-        Lk = np.linalg.solve(L, K_s.detach().numpy())
-        mu = np.dot(Lk.T, np.linalg.solve(L, self.Y.detach().numpy())-self.mean_constant*np.ones_like(self.Y.detach().numpy())).reshape((len(test_data),))
+        Lk = np.linalg.solve(L, K_s.cpu().detach().numpy())
+        mu = np.dot(Lk.T, np.linalg.solve(L, self.Y.cpu().detach().numpy())-self.mean_constant*np.ones_like(self.Y.cpu().detach().numpy())).reshape((len(test_data),))
 
         # Comoute the standard devaitoin so we can plot it
         s2 = np.diag(K_ss.detach().numpy()) - np.sum(Lk ** 2, axis=0)
-        stdv = np.sqrt(s2+ self.transform_softplus(self.noise_obs,1e-4).detach().numpy())
+        stdv = np.sqrt(s2+ self.transform_softplus(self.noise_obs,1e-4).cpu().detach().numpy())
 
         return mu, stdv
 
@@ -293,7 +292,7 @@ class GP():
             K = self.transform_softplus(self.variance) * self.get_K_RBF_Sig_dummy(self.indices_1)
         else:
             K = self.transform_softplus(self.variance) * self.K.data
-        K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype)
+        K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype,device=self.device)
 
         L = torch.cholesky(K0)
 
@@ -303,12 +302,12 @@ class GP():
             K_s = self.transform_softplus(self.variance) * self.get_K_RBF_Sig_dummy(self.indices_1,self.indices_2)
 
         else:
-            K_s = self.transform_softplus(self.variance) * torch.tensor(K_s,dtype=self.dtype)
-            K_ss = self.transform_softplus(self.variance) * torch.tensor(K_ss,dtype=self.dtype)
+            K_s = self.transform_softplus(self.variance) * torch.tensor(K_s,dtype=self.dtype,device=self.device)
+            K_ss = self.transform_softplus(self.variance) * torch.tensor(K_ss,dtype=self.dtype,device=self.device)
         Lk = torch.triangular_solve(K_s,L,upper=False)[0]
         Ly = torch.triangular_solve(self.Y-self.mean_constant*torch.ones_like(self.Y,dtype=self.dtype),L,upper=False)[0]
 
-        mu_test = self.mean_constant*torch.ones((K_ss.shape[0],1),dtype=self.dtype) + torch.mm(Lk.t(),Ly)
+        mu_test = self.mean_constant*torch.ones((K_ss.shape[0],1),dtype=self.dtype,device=self.device) + torch.mm(Lk.t(),Ly)
 
         # Comoute the standard devaitoin so we can plot it
 
@@ -317,4 +316,4 @@ class GP():
 
 
 
-        return mu_test.detach().numpy(), stdv_test.detach().numpy()
+        return mu_test.cpu().detach().numpy(), stdv_test.cpu().detach().numpy()
