@@ -28,7 +28,7 @@ def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100)
             ''' GENERATE DATA '''
             example.generate_data(N_bags=N_bags, N_items=N_items, t_span=tspan, spec_param=spec_param, stdv_pos=param,
                           stdv_noise=0.3)
-            example.e_ang()
+            example.get_e_ang()
 
             ''' PREPARE DATA FOR REGRESSION '''
             data_scaled, y_scaled, train_indices, test_indices = utils.split_standardize(example.labels, example.paths,

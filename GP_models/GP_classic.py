@@ -40,9 +40,9 @@ def plot_marginal_log_lik(model):
 
 def train(model, training_iter, plot=False):
 
-    print('transf. var',model.transform_softplus(model.variance))
-    print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
-    print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
+    #print('transf. var',model.transform_softplus(model.variance))
+    #print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
+    #print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
@@ -63,9 +63,9 @@ def train(model, training_iter, plot=False):
                 plt.xlabel('epoch')
                 plt.ylabel('negative marginal log likelihood')
                 plt.show()
-                print('transf. var',model.transform_softplus(model.variance))
-                print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
-                print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
+                #print('transf. var',model.transform_softplus(model.variance))
+                #print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
+                #print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
             break
         optimizer.step()
     if plot and not already_plot:

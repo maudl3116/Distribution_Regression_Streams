@@ -79,24 +79,24 @@ class Ellipsis():
         self.b = b[:,None]
         self.stdv_noise = stdv_noise[:,None]
 
-    def e1(self):
+    def get_e1(self):
         # first excentricity
         self.e1 = np.sqrt(1.-np.minimum(self.b,self.a)**2/np.maximum(self.b,self.a)**2)
         self.labels = self.e1
 
-    def e2(self):
+    def get_e2(self):
         # second excentricity
         self.e2 = np.sqrt(np.maximum(self.b, self.a) ** 2 / np.minimum(self.b, self.a) ** 2 -1. )
         self.labels = self.e2
 
 
-    def e3(self):
+    def get_e3(self):
         # second excentricity
         self.e3 = np.sqrt(np.maximum(self.b, self.a) ** 2 - np.minimum(self.b, self.a) ** 2)/np.sqrt(np.maximum(self.b, self.a) ** 2 + np.minimum(self.b, self.a) ** 2)
         self.labels = self.e3
 
 
-    def e_ang(self):
+    def get_e_ang(self):
         # angular excentricity
         self.e_ang = np.arccos(np.minimum(self.b, self.a)/np.maximum(self.b, self.a))
         self.labels = self.e_ang
