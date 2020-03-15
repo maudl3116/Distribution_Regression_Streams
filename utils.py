@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.preprocessing import QuantileTransformer
+from addtime import AddTime, LeadLag
 
 def split_standardize(y,data,standardized=True,method = 'standard'):
     # 3. GET STRATIFIED SPLITS
@@ -53,3 +54,20 @@ def split_standardize(y,data,standardized=True,method = 'standard'):
         y_scaled = y
 
     return data_scaled, y_scaled, train, test
+
+
+def add_dimension(samples,add_time,lead_lag=None):
+
+    new_samples = []
+
+    add_time_tf = AddTime()
+    lead_lag_tf = LeadLag([lead_lag])
+
+    for i in range(len(samples)):
+
+        if lead_lag is not None:
+            new_samples.append(lead_lag_tf.fit_transform(samples[i]))
+        if add_time:
+            new_samples.append(add_time_tf.fit_transform(samples[i]))
+
+    return np.array(new_samples)

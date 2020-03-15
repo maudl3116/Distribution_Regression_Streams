@@ -161,6 +161,8 @@ class Ellipsis():
                 ax[i].set_title('label: %.2f' % self.labels[order][samples[i]])
             ax[i].axhline(0,ls='--',color='black')
             ax[i].axvline(0,ls='--',color='black')
+            ax[i].plot(self.pos_x[order][samples[i]]+,)
+            ax[i].scatter(self.pos_x[order][samples[i]],self.pos_y[order][samples[i]],marker='+',color='red',s=100)
         plt.show()
 
     def plot_subsampled_paths(self,N = 3, N_items=5):
