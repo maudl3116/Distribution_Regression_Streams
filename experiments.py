@@ -119,7 +119,7 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,
 
     model.K = torch.tensor(K, dtype=torch.float64,device=device)
 
-    GP_sig.train(model, 2000, RBF=RBF, plot=True)
+    GP_sig.train(model, 2000, RBF=RBF, plot=plot)
 
     if RBF:
         model.K_full = model.get_K_RBF_Sig(torch.tensor(K_precomputed, dtype=torch.float64,device=device))
