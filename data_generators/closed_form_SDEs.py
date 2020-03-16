@@ -183,7 +183,7 @@ class SDE_FBM_2D_Lagged():
         self.spec_param = spec_param
 
 
-    def generate_data(self, N_bags=100, N_items=15, t_span=np.linspace(0, 1, 100),spec_param={'sigma1': [1., 2.],'sigma2':[0.2,0.8],'hurst':[0.2,0.8]},lag=3):
+    def generate_data(self, N_bags=100, N_items=15, t_span=np.linspace(0, 1, 100),spec_param={'sigma1': [1., 2.],'sigma2':[0.2,0.8],'hurst':[0.2,0.8],'lag':[3,10]}):
 
         self.set_parameters(N_bags, N_items, t_span, spec_param)
 
@@ -191,6 +191,10 @@ class SDE_FBM_2D_Lagged():
         sigma1 = (spec_param['sigma1'][1] - spec_param['sigma1'][0]) * np.random.rand(N_bags) + spec_param['sigma1'][0] * np.ones(N_bags)
         sigma2 = (spec_param['sigma2'][1] - spec_param['sigma2'][0]) * np.random.rand(N_bags) + spec_param['sigma2'][0] * np.ones(N_bags)
         hursts = (spec_param['hurst'][1] - spec_param['hurst'][0]) * np.random.rand(N_bags) + spec_param['hurst'][0] * np.ones(N_bags)
+
+        lags = np.random.choice(np.arange(spec_param['lag'][0],spec_param['lag'][1]), N_bags, replace=True)
+        min_lags = min(lags)
+        max_lags = max(lags)
 
         # generate the paths
         times = []
@@ -207,9 +211,11 @@ class SDE_FBM_2D_Lagged():
 
             for j in range(N_items):
                 fbm_sample = f.fbm()
-                x1 = np.exp(sigma1[i]*fbm_sample[:-lag])
-                x2 = np.exp(sigma2[i] * fbm_sample[lag:])
-
+                x1 = np.exp(sigma1[i] * fbm_sample[:-lags[i]])
+                x2 = np.exp(sigma2[i] * fbm_sample[lags[i]:])
+                # we need all paths to have the same shape
+                x1 = x1[:len(fbm_sample[max_lags:])]
+                x2 = x2[:len(fbm_sample[max_lags:])]
                 items.append(np.hstack([x1[:,None],x2[:,None]]))
 
             paths.append(items)
@@ -218,6 +224,7 @@ class SDE_FBM_2D_Lagged():
         self.sigma1 = sigma1[:,None]
         self.sigma2 = sigma2[:, None]
         self.hursts = hursts[:,None]
+        self.lags = lags[:,None]
         self.times = np.array(times)
 
 
