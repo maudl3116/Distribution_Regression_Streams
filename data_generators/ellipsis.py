@@ -126,6 +126,7 @@ class Ellipsis():
         plt.title('labels against naive norm (min-max-scaled for visualization)')
         plt.show()
 
+
     def subsample_paths(self,N,same_grid_items=True):
 
         paths_sub = []
@@ -137,10 +138,14 @@ class Ellipsis():
                 paths_sub.append(self.paths[bag][:, sub])
                 subs.append(sub)
             else:
+                items = []
+                sub_items = []
                 for item in range(self.N_items):
                     sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
-                    paths_sub.append(self.paths[bag][item, sub])
-                    subs.append(sub)
+                    items.append(self.paths[bag][item, sub])
+                    sub_items.append(sub)
+                subs.append(sub_items)
+                paths_sub.append(items)
 
 
         self.paths_sub = np.array(paths_sub)
