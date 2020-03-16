@@ -102,7 +102,7 @@ class SDE_FBM():
             else:
                 for item in range(self.N_items):
                     sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
-                    paths_sub.append(self.paths[bag][item, sub])
+                    paths_sub.append([self.paths[bag][item, sub]])
                     subs.append(sub)
 
 
