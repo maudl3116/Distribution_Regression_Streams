@@ -89,20 +89,24 @@ class SDE_FBM():
         plt.title('labels against naive norm (min-max-scaled for visualization)')
         plt.show()
 
-    def subsample_paths(self, N):
+    def subsample_paths(self,N,same_grid_items=True):
 
         paths_sub = []
-        times_sub = []
+
         subs = []
         for bag in range(self.N_bags):
-            sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
+            if same_grid_items:
+                sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
+                paths_sub.append(self.paths[bag][:, sub])
+                subs.append(sub)
+            else:
+                for item in range(self.N_items):
+                    sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
+                    paths_sub.append(self.paths[bag][item, sub])
+                    subs.append(sub)
 
-            paths_sub.append(self.paths[bag][:, sub])
-            times_sub.append(self.times[bag][:,sub])  # to check
-            subs.append(sub)
 
         self.paths_sub = np.array(paths_sub)
-        self.times_sub = np.array(times_sub)
         self.subs = subs
 
     def plot(self, N=3, N_items=5):
