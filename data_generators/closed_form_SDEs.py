@@ -192,9 +192,12 @@ class SDE_FBM_2D_Lagged():
         sigma2 = (spec_param['sigma2'][1] - spec_param['sigma2'][0]) * np.random.rand(N_bags) + spec_param['sigma2'][0] * np.ones(N_bags)
         hursts = (spec_param['hurst'][1] - spec_param['hurst'][0]) * np.random.rand(N_bags) + spec_param['hurst'][0] * np.ones(N_bags)
 
-        lags = np.random.choice(np.arange(spec_param['lag'][0],spec_param['lag'][1]), N_bags, replace=True)
-        min_lags = min(lags)
-        max_lags = max(lags)
+        if spec_param['lag'][0]==spec_param['lag'][1]:
+            lags = spec_param['lag'][0]*np.ones(N_bags)
+            max_lags = spec_param['lag'][0]
+        else:
+            lags = np.random.choice(np.arange(spec_param['lag'][0],spec_param['lag'][1]), N_bags, replace=True)
+            max_lags = max(lags)
 
         if stdv_pos!=0:
             pos_x = stdv_pos * np.random.randn(N_bags) + mean_pos
