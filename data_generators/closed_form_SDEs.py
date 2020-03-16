@@ -118,6 +118,12 @@ class SDE_FBM():
         self.paths_sub = np.array(paths_sub)
         self.subs = subs
 
+    def subsample_items(self,N):
+
+        sub = np.sort(np.random.choice(np.arange(self.N_items), N, replace=False))
+        self.paths_sub = self.paths[:,sub,:,:]
+
+
     def plot(self, N=3, N_items=5):
 
         sns.set(font_scale=1)
