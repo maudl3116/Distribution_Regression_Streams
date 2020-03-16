@@ -27,6 +27,7 @@ class SDE_FBM():
 
         # generate the labels. If spec_param[param][1]= spec_param[param][0], then the parameter param is fixed
         sigmas = (spec_param['sigma'][1] - spec_param['sigma'][0]) * np.random.rand(N_bags) + spec_param['sigma'][0] * np.ones(N_bags)
+        mus = (spec_param['mu'][1] - spec_param['mu'][0]) * np.random.rand(N_bags) + spec_param['mu'][0] * np.ones(N_bags)
         hursts = (spec_param['hurst'][1] - spec_param['hurst'][0]) * np.random.rand(N_bags) + spec_param['hurst'][0] * np.ones(N_bags)
         y0 = y0_mean + y0_stdv * np.random.randn(N_bags)
 
@@ -46,13 +47,14 @@ class SDE_FBM():
             for j in range(N_items):
                 fbm_sample = f.fbm()
 
-                item = y0[i]*np.exp(sigmas[i]*fbm_sample[:,None])
+                item = y0[i]*np.exp(mus[i]*t_span[:,None] + sigmas[i]*fbm_sample[:,None])
 
                 items.append(item)
 
             paths.append(items)
 
         self.paths = np.array(paths)
+        self.mus = mus[:,None]
         self.sigmas = sigmas[:,None]
         self.hursts = hursts[:,None]
         self.times = np.array(times)
@@ -63,6 +65,9 @@ class SDE_FBM():
 
     def get_sigma(self):
         self.labels = self.sigmas
+
+    def get_mu(self):
+        self.labels = self.mus
 
     def compute_plot_naive_norms(self):
 
