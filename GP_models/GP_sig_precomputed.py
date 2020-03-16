@@ -85,7 +85,7 @@ def train(model,training_iter,RBF=False,plot=False):
             break
         optimizer.step()
     if plot and not already_plot:
-        plt.plot(losses.cpu().detach().numpy())
+        plt.plot([e[0].cpu().detach().numpy() for e in losses])
         plt.show()
 
 
