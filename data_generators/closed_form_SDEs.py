@@ -183,7 +183,7 @@ class SDE_FBM_2D_Lagged():
         self.spec_param = spec_param
 
 
-    def generate_data(self, N_bags=100, N_items=15, t_span=np.linspace(0, 1, 100),spec_param={'sigma1': [1., 2.],'sigma2':[0.2,0.8],'hurst':[0.2,0.8],'lag':[3,10]}):
+    def generate_data(self, N_bags=100, N_items=15, t_span=np.linspace(0, 1, 100),spec_param={'sigma1': [1., 2.],'sigma2':[0.2,0.8],'hurst':[0.2,0.8],'lag':[3,10]},mean_pos=1.,stdv_pos=0):
 
         self.set_parameters(N_bags, N_items, t_span, spec_param)
 
@@ -195,6 +195,13 @@ class SDE_FBM_2D_Lagged():
         lags = np.random.choice(np.arange(spec_param['lag'][0],spec_param['lag'][1]), N_bags, replace=True)
         min_lags = min(lags)
         max_lags = max(lags)
+
+        if stdv_pos!=0:
+            pos_x = stdv_pos * np.random.randn(N_bags) + mean_pos
+            pos_y = stdv_pos * np.random.randn(N_bags) + mean_pos
+        else:
+            pos_x = mean_pos*np.ones(N_bags)
+            pos_y = mean_pos*np.ones(N_bags)
 
         # generate the paths
         times = []
@@ -211,8 +218,8 @@ class SDE_FBM_2D_Lagged():
 
             for j in range(N_items):
                 fbm_sample = f.fbm()
-                x1 = np.exp(sigma1[i] * fbm_sample[:-lags[i]])
-                x2 = np.exp(sigma2[i] * fbm_sample[lags[i]:])
+                x1 = pos_y[i]*np.exp(sigma1[i] * fbm_sample[:-lags[i]])
+                x2 = pos_x[i]*np.exp(sigma2[i] * fbm_sample[lags[i]:])
                 # we need all paths to have the same shape
                 x1 = x1[:len(fbm_sample[max_lags:])]
                 x2 = x2[:len(fbm_sample[max_lags:])]
