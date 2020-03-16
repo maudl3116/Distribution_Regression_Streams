@@ -40,7 +40,7 @@ class SDE_FBM():
             items = []
 
 
-            f = FBM(n=len(t_span), hurst=hursts[i], length=t_span[-1], method='daviesharte')
+            f = FBM(n=(len(t_span)-1), hurst=hursts[i], length=t_span[-1], method='daviesharte')
             t_values = f.times()
             times.append(t_values)
 
