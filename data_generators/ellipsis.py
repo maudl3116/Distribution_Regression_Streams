@@ -126,18 +126,22 @@ class Ellipsis():
         plt.title('labels against naive norm (min-max-scaled for visualization)')
         plt.show()
 
-    def subsample_paths(self,N):
+    def subsample_paths(self,N,same_grid_items=True):
 
         paths_sub = []
 
         subs = []
         for bag in range(self.N_bags):
+            if same_grid_items:
+                sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
+                paths_sub.append(self.paths[bag][:, sub])
+                subs.append(sub)
+            else:
+                for item in range(self.N_items):
+                    sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
+                    paths_sub.append(self.paths[bag][item, sub])
+                    subs.append(sub)
 
-            sub = np.sort(np.random.choice(np.arange(self.L), N, replace=False))
-
-            paths_sub.append(self.paths[bag][:, sub])
-
-            subs.append(sub)
 
         self.paths_sub = np.array(paths_sub)
         self.subs = subs
@@ -161,7 +165,7 @@ class Ellipsis():
                 ax[i].set_title('label: %.2f' % self.labels[order][samples[i]])
             ax[i].axhline(0,ls='--',color='black')
             ax[i].axvline(0,ls='--',color='black')
-            ax[i].plot(self.pos_x[order][samples[i]]+,)
+
             ax[i].scatter(self.pos_x[order][samples[i]],self.pos_y[order][samples[i]],marker='+',color='red',s=100)
         plt.show()
 

@@ -102,14 +102,14 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
 
     return RMSE_train, R2_train, RMSE_test, R2_test
 
-def experiment_precomputed(K_precomputed, y, train_index, test_index, RBF=False,plot=False,device=torch.device("cpu")):
+def experiment_precomputed(K_precomputed, y, train_index, test_index, param_init=[0,0,0],RBF=False,plot=False,device=torch.device("cpu")):
     y_train, y_test = y[train_index], y[test_index]
 
 
     if RBF:
-        model = GP_sig.GP(np.zeros(int(len(train_index))), torch.tensor(y_train, dtype=torch.float64,device=device), 0, 0, 0,['lengthscale', 'variance', 'noise'], 0,device=device)
+        model = GP_sig.GP(np.zeros(int(len(train_index))), torch.tensor(y_train, dtype=torch.float64,device=device), param_init[0], param_init[1], param_init[2],['lengthscale', 'variance', 'noise'], 0,device=device)
     else:
-        model = GP_sig.GP(np.zeros(int(len(train_index))), torch.tensor(y_train, dtype=torch.float64,device=device), 0, 0, 0, ['variance', 'noise'], 0,device=device)
+        model = GP_sig.GP(np.zeros(int(len(train_index))), torch.tensor(y_train, dtype=torch.float64,device=device), param_init[0], param_init[1], param_init[2], ['variance', 'noise'], 0,device=device)
 
 
 

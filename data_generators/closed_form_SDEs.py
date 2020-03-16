@@ -21,13 +21,14 @@ class SDE_FBM():
         self.spec_param = spec_param
 
 
-    def generate_data(self, N_bags=100, N_items=15, t_span=np.linspace(0, 1, 100),spec_param={'mu': [1., 2.], 'sigma': [1., 2.],'hurst':[0.2,0.8]}):
+    def generate_data(self, N_bags=100, N_items=15, t_span=np.linspace(0, 1, 100),spec_param={'sigma': [1., 2.],'hurst':[0.2,0.8]},y0_mean=1.,y0_stdv=0.):
 
         self.set_parameters(N_bags, N_items, t_span, spec_param)
 
         # generate the labels. If spec_param[param][1]= spec_param[param][0], then the parameter param is fixed
         sigmas = (spec_param['sigma'][1] - spec_param['sigma'][0]) * np.random.rand(N_bags) + spec_param['sigma'][0] * np.ones(N_bags)
         hursts = (spec_param['hurst'][1] - spec_param['hurst'][0]) * np.random.rand(N_bags) + spec_param['hurst'][0] * np.ones(N_bags)
+        y0 = y0_mean + y0_stdv * np.random.randn(N_bags)
 
         # generate the paths
         times = []
@@ -45,7 +46,7 @@ class SDE_FBM():
             for j in range(N_items):
                 fbm_sample = f.fbm()
 
-                item = np.exp(sigmas[i]*fbm_sample[:,None])
+                item = y0[i]*np.exp(sigmas[i]*fbm_sample[:,None])
 
                 items.append(item)
 
@@ -55,6 +56,7 @@ class SDE_FBM():
         self.sigmas = sigmas[:,None]
         self.hursts = hursts[:,None]
         self.times = np.array(times)
+        self.y0 = y0[:,None]
 
     def get_hurst(self):
         self.labels = self.hursts
@@ -106,21 +108,21 @@ class SDE_FBM():
     def plot(self, N=3, N_items=5):
 
         sns.set(font_scale=1)
-        fig, ax = plt.subplots(N, N, figsize=(5, 5))
+        fig, ax = plt.subplots(1,N, figsize=(N*5, 5))
         ax = ax.ravel()
-        colors = sns.color_palette("hls", int(self.N_bags / (N ** 2)))
+        colors = sns.color_palette("hls", int(self.N_bags / N))
 
         order = np.argsort(self.labels[:, 0])
-        samples = np.arange(0, len(order), int(self.N_bags / (N ** 2)))
+        samples = np.arange(0, len(order), int(self.N_bags / N))
 
-        for i in range(N*N):
+        for i in range(int(len(samples))):
 
             for item in range(N_items):
 
                 ax[i].plot(self.times[order][samples[i]].T, self.paths[order][samples[i]][item,:,0].T,
                            color=colors[i])
                 ax[i].set_title('label: %.2f' % self.labels[order][samples[i]])
-
+        plt.tight_layout()
         plt.show()
 
     def plot_subsampled_paths(self, N=3, N_items=5):
