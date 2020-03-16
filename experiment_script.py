@@ -8,7 +8,7 @@ import pickle
 import pandas as pd
 import torch
 
-def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100),spec_param = {'a':[1.,3.], 'b':[1.,3.]}):
+def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100),spec_param = {'a':[1.,3.], 'b':[1.,3.]},device=torch.device('cpu')):
 
     # in this experiment, we evaluate the robustness of two regression models to the position noise of the ellipsis.
     example = ellipsis.Ellipsis()
@@ -42,7 +42,7 @@ def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100)
             input_ = np.concatenate([dim_1, dim_2], axis=2)
 
             train_RBF_rmse, train_RBF_r2, test_RBF_rmse, test_RBF_r2 = experiments.naive_experiment(input_, y_scaled, train_indices, test_indices,
-                                                               param_init=[5, 1, 0],device=torch.device('cuda'))
+                                                               param_init=[5, 1, 0],device=device)
 
 
             ''' GP SIG '''
@@ -51,7 +51,7 @@ def exp1(N_MC,noise_pos,N_bags=100, N_items=15, tspan=np.linspace(0,2*np.pi,100)
                                                                        a=1, ilya_rescale=True, return_norms=False)
             K_precomputed = experiments.precompute_K(expected_pathwise_sig)
             train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 = experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices, RBF=True,
-                                                         plot=False,device=torch.device('cuda'))
+                                                         plot=False,device=device)
 
 
             ''' STORE THE RESULTS '''
