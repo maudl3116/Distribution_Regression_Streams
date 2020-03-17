@@ -155,12 +155,12 @@ class Ellipsis():
     def plot(self,N = 3, N_items=5):
 
         sns.set(font_scale=1)
-        fig, ax = plt.subplots(N, N, figsize=(10, 10))
+        fig, ax = plt.subplots(1,N, figsize=(N*5, 5))
         ax = ax.ravel()
-        colors = sns.color_palette("hls", N*N)
+        colors = sns.color_palette("RdYlBu", N)
 
         order = np.argsort(self.labels[:,0])
-        samples = np.arange(0,len(order),int(self.N_bags/(N**2)))
+        samples = np.arange(0,len(order),int(self.N_bags/(N)))
 
 
         for i in range(len(samples)):
@@ -170,8 +170,15 @@ class Ellipsis():
                 ax[i].set_title('label: %.2f' % self.labels[order][samples[i]])
             ax[i].axhline(0,ls='--',color='black')
             ax[i].axvline(0,ls='--',color='black')
+            ax[i].set_xlabel('$x^1(t)$')
+            ax[i].set_ylabel('$x^2(t)$')
+            ax[i].set_xlim([self.pos_x[order][samples[i]]-3.5,self.pos_x[order][samples[i]]+3.5])
+            ax[i].set_ylim([self.pos_y[order][samples[i]]-3.5,self.pos_y[order][samples[i]]+3.5])
 
-            ax[i].scatter(self.pos_x[order][samples[i]],self.pos_y[order][samples[i]],marker='+',color='red',s=100)
+            ax[i].scatter(self.pos_x[order][samples[i]],self.pos_y[order][samples[i]],marker='+',color='red',s=100,label=r'$(\alpha,\beta)$')
+            ax[i].legend(loc='upper right')
+        plt.tight_layout()
+        plt.savefig('ellipsis.pdf')
         plt.show()
 
     def plot_subsampled_paths(self,N = 3, N_items=5):
@@ -179,7 +186,7 @@ class Ellipsis():
         sns.set(font_scale=1)
         fig, ax = plt.subplots(N, N, figsize=(10, 10))
         ax = ax.ravel()
-        colors = sns.color_palette("hls", N*N)
+        colors = sns.color_palette("husl", N*N)
 
         order = np.argsort(self.labels[:,0])
         samples = np.arange(0,len(order),int(self.N_bags/N**2))
@@ -200,7 +207,7 @@ class Ellipsis():
 
         sns.set(font_scale=1)
         fig = plt.figure(figsize=(5, 5))
-        colors = sns.color_palette("hls", N)
+        colors = sns.color_palette("husl", N)
 
         order = np.argsort(self.labels[:,0])
         samples = np.arange(0,len(order),int(self.N_bags/N))
