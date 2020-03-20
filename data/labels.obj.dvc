@@ -1,0 +1,7 @@
+md5: ca0ac34d87bf2720ec5c07bdfb684158
+outs:
+- md5: 19252dad888da1ca078a7330550c4cf3
+  path: labels.obj
+  cache: true
+  metric: false
+  persist: false

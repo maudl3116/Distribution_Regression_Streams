@@ -1,0 +1,7 @@
+md5: eadde66e0a51daf4b8d745049d13db5f
+outs:
+- md5: 0f67a43a1efde028d460ffa38a91d9ee
+  path: data.obj
+  cache: true
+  metric: false
+  persist: false
