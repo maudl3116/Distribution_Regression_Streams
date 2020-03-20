@@ -1,4 +1,4 @@
-[core]
-    remote = distribution_regression_streams
-['remote "distribution_regression_streams"']
-    url = gdrive://1V-x6XNxRhpXhFdb-ObxOm5C8wmnh3mgL
+['remote "expectedsignature"']
+    url = gdrive://ExpectedSignature
+    gdrive_client_id = 25191565387-gnkkoo8en9fr8mu6gehh424jnj7limpo.apps.googleusercontent.com
+    gdrive_client_secret = u6pHCeKjxy3KJgHO5crzNsSM
