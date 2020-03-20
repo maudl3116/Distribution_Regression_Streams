@@ -10,6 +10,7 @@ from gpytorch.kernels import RBFKernel
 from torch.autograd import Variable
 from gpytorch.kernels import Kernel, RBFKernel
 from gpytorch.kernels.kernel import Kernel
+import pandas as pd
 
 def split_standardize(y,data,standardized=True,method = 'standard'):
     # 3. GET STRATIFIED SPLITS
@@ -64,7 +65,7 @@ def split_standardize(y,data,standardized=True,method = 'standard'):
     return data_scaled, y_scaled, train, test
 
 
-def split_standardize_real_data(y,data,standardized=True,method = 'standard'):
+def split_standardize_label(y,standardized=True,method = 'standard'):
     # 3. GET STRATIFIED SPLITS
 
     y = np.array(y)
@@ -88,23 +89,11 @@ def split_standardize_real_data(y,data,standardized=True,method = 'standard'):
         y_binned = np.digitize(y[:,0], bins)
 
 
-
         train, test, _, _ = train_test_split(np.arange(len(y)), np.array(y), shuffle=True, test_size=1./4,
                                          stratify=y_binned)
 
     # 3. STANDARDIZE
     if standardized:
-
-
-        scaler = StandardScaler()
-        to_fit = np.array([data[i].copy() for i in train])
-        #print(to_fit.shape)
-
-        scaler.fit(to_fit)
-
-        to_transform = np.array([data[i].copy() for i in range(len(y))])
-        #print(to_transform.shape)
-        data_scaled = scaler.transform(to_transform).reshape(np.array(data).shape)
 
         scaler = QuantileTransformer(n_quantiles=10, random_state=0)
         to_fit = y[train]
@@ -113,10 +102,27 @@ def split_standardize_real_data(y,data,standardized=True,method = 'standard'):
         y_scaled = scaler.transform(y.copy())
 
     else:
-        data_scaled = data
         y_scaled = y
 
-    return data_scaled, y_scaled, train, test
+    return y_scaled, train, test
+
+def standardize_real_data(data,train,test,clim_col):
+
+    # 3. STANDARDIZE
+    if True:
+
+        indices = [e.index for e in data]
+        scaler = StandardScaler()
+        to_fit = np.concatenate([data[i].copy() for i in train],axis=0)
+        print(to_fit.shape)
+
+        scaler.fit(to_fit)
+
+        to_transform = np.concatenate([data[i].copy() for i in range(len(data))],axis=0)
+        #print(to_transform.shape)
+        data_scaled = [scaler.transform(data[i].copy()) for i in range(len(data))]#.reshape(np.array(data).shape)
+        data_scaled = [pd.DataFrame(e, index=indices[i], columns=clim_col) for i,e in enumerate(data_scaled) ]
+    return data_scaled
 
 
 def add_dimension(samples,add_time,lead_lag=None):

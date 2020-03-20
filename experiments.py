@@ -166,10 +166,11 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
     if RBF:
         model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d, level_sig, param_init[0], param_init[1], param_init[2],param_list = ['lengthscale', 'variance', 'noise'], device=device)
     else:
-        model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d,level_sig, param_init[0], param_init[1], param_init[2], param_list = ['variance', 'noise'], device=device)
+        model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d,level_sig, param_init[0], param_init[1], param_init[2], param_list = ['lengthscale', 'noise'], device=device)
 
-    GP_sig.train(model, 2000, RBF=RBF, plot=plot)
-
+    GP_sig_ARD.train(model, 2000, RBF=RBF, plot=plot)
+    print(torch.max(model.K))
+    print(torch.min(model.K))
 
     mu_test, stdv_test = model.predict(x_test_torch, RBF=RBF)
     mu_train, stdv_train = model.predict_on_training(RBF=RBF)

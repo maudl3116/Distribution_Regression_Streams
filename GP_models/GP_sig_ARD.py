@@ -141,7 +141,7 @@ class GP():
         self.params.append(self.mean_constant)
 
         if 'lengthscale' in param_list:
-            self.lengthscale = torch.nn.Parameter(l_init * torch.ones(self.level_sig, dtype=self.dtype, device=self.device))
+            self.lengthscale = torch.nn.Parameter(torch.randn(self.level_sig, dtype=self.dtype, device=self.device))
             self.params.append(self.lengthscale)
         else:
             self.lengthscale = l_init * torch.ones(1, dtype=self.dtype, device=self.device)
@@ -200,7 +200,7 @@ class GP():
 
         tf_lengthscales = self.transform_softplus(self.lengthscale)
         l = torch.cat([e.repeat(self.d**(i)) for i,e in enumerate(tf_lengthscales)])
-       
+
         return torch.cat([e.repeat(self.d**(i)) for i,e in enumerate(tf_lengthscales)])
 
     def K_RBF_eval(self,x1,x2=None):
@@ -230,7 +230,7 @@ class GP():
         if x2 is None:
             x2=x1
 
-        tf_lengthscales = self.transform_softplus(self.lengthscale)
+        tf_lengthscales = self.get_lengthscales()
 
         # x is of shape [N_bags x T x N_items]
         x1 = x1.div(tf_lengthscales)
@@ -280,8 +280,11 @@ class GP():
 
     def predict(self, x_new, RBF=False):
 
-
-        K0 = self.K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(self.K.shape[0], dtype=self.dtype,
+        if RBF:
+            K0 = self.transform_softplus(self.variance) *self.K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(self.K.shape[0], dtype=self.dtype,
+                                                                                    device=self.device)
+        else:
+            K0 = self.K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(self.K.shape[0], dtype=self.dtype,
                                                                            device=self.device)
 
         L = torch.cholesky(K0)
@@ -309,8 +312,12 @@ class GP():
         return mu_test.cpu().detach().numpy(), stdv_test.cpu().detach().numpy()
 
     def predict_on_training(self, RBF=False):
+        if RBF:
+            K0 = self.transform_softplus(self.variance)*self.K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(self.K.shape[0], dtype=self.dtype,
+                                                                                    device=self.device)
 
-        K0 = self.K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(self.K.shape[0], dtype=self.dtype,
+        else:
+            K0 = self.K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(self.K.shape[0], dtype=self.dtype,
                                                                                 device=self.device)
 
         L = torch.cholesky(K0)

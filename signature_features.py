@@ -198,12 +198,13 @@ def get_scaled_sig(bag, level_sig, M,a):
     maxi = M * (1. + 1. / a)
 
     for item in bag:
+        #print(item[None,:].shape)
         sig = signatory.signature(torch.tensor(item[None, :]), level_sig)
         norms = get_norm_level_sig(sig[0].numpy(), item.shape[1], level_sig)
         psi = psi_tilde(np.sum(norms), M, a)
 
         lambda_ = brentq(poly, 0, 10000, args=(psi, norms, level_sig))
-
+        print(norms.sum)
         #print(np.sum(norms))
         new_bag.append(item * lambda_)
 

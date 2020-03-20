@@ -157,7 +157,8 @@ class Ellipsis():
         sns.set(font_scale=1)
         fig, ax = plt.subplots(1,N, figsize=(N*5, 5))
         ax = ax.ravel()
-        colors = sns.color_palette("RdYlBu", N)
+        colors = N*['blue']#sns.color_palette("RdYlBu", N)
+
 
         order = np.argsort(self.labels[:,0])
         samples = np.arange(0,len(order),int(self.N_bags/(N)))
