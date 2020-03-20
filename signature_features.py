@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import iisignature
 import torch
 import numpy as np
+import signatory
 
 def expected_sig(X,level_sig):
     expected_sig = []

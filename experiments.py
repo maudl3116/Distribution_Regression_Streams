@@ -1,4 +1,5 @@
 import GP_models.GP_sig_precomputed as GP_sig
+import GP_models.GP_sig_ARD as GP_sig_ARD
 import GP_models.GP_classic as GP_naive
 from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
@@ -100,7 +101,7 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
     #                                    stdv_test)
     #plt.show()
 
-    return RMSE_train, R2_train, RMSE_test, R2_test
+    return RMSE_train, R2_train, RMSE_test, R2_test, mu_test
 
 def experiment_precomputed(K_precomputed, y, train_index, test_index, param_init=[0,0,0],RBF=False,plot=False,device=torch.device("cpu")):
     y_train, y_test = y[train_index], y[test_index]
@@ -153,6 +154,51 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, param_init
     #plt.show()
 
     return RMSE_train, R2_train, RMSE_test, R2_test
+
+
+def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,0,0],RBF=False,plot=False,device=torch.device("cpu")):
+    y_train, y_test = y[train_index], y[test_index]
+    x_train, x_test = data[train_index], data[test_index]
+
+    x_train_torch = torch.tensor(x_train,dtype=torch.float64,device=device)
+    x_test_torch = torch.tensor(x_test, dtype=torch.float64, device=device)
+
+    if RBF:
+        model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d, level_sig, param_init[0], param_init[1], param_init[2],param_list = ['lengthscale', 'variance', 'noise'], device=device)
+    else:
+        model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d,level_sig, param_init[0], param_init[1], param_init[2], param_list = ['variance', 'noise'], device=device)
+
+    GP_sig.train(model, 2000, RBF=RBF, plot=plot)
+
+
+    mu_test, stdv_test = model.predict(x_test_torch, RBF=RBF)
+    mu_train, stdv_train = model.predict_on_training(RBF=RBF)
+
+    R2_train = compute_r2(y_train[:, 0], mu_train[:, 0])
+    RMSE_train = compute_rmse(y_train[:, 0], mu_train[:, 0])
+
+    R2_test = compute_r2(y_test[:, 0], mu_test[:, 0])
+    RMSE_test = compute_rmse(y_test[:, 0], mu_test[:, 0])
+
+
+    #ax = plt.figure(figsize=(25, 7))
+    #regression_models.plot_fit(axs[0], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
+
+    if plot:
+        fig, axs = plt.subplots(1, 2, figsize=(25, 7))
+        axs = axs.ravel()
+        plot_fit(axs[0], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
+        plot_fit(axs[1], y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
+        plt.show()
+    #fig = plt.figure(figsize=(25, 7))
+    #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train,y_test[:, 0], mu_test[:, 0], stdv_test)
+    #plt.show()
+
+    return RMSE_train, R2_train, RMSE_test, R2_test
+
+
+
+
 
 
 def plot_fit(ax, y_, pred, low=None, up=None, std=None, sklearn=False):
