@@ -1,0 +1,4 @@
+[core]
+    remote = distribution_regression_streams
+['remote "distribution_regression_streams"']
+    url = gdrive://1V-x6XNxRhpXhFdb-ObxOm5C8wmnh3mgL
