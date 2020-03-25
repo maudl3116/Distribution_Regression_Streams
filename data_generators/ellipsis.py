@@ -2,6 +2,7 @@ import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import iisignature
 
 class Ellipsis():
 
@@ -89,6 +90,13 @@ class Ellipsis():
         self.e2 = np.sqrt(np.maximum(self.b, self.a) ** 2 / np.minimum(self.b, self.a) ** 2 -1. )
         self.labels = self.e2
 
+    def get_area(self):
+
+        sig = np.concatenate([iisignature.sig(self.paths,2)] ,axis=1)
+        # 12-21 <-> (for a 2d path) 3-4   [1,2|11,12,21,22]
+        areas = 0.5*(sig[:, :,3] - sig[:,:, 4])
+
+        self.labels = areas[:,None]
 
     def get_e3(self):
         # second excentricity
