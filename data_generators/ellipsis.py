@@ -97,7 +97,7 @@ class Ellipsis():
 
         areas = 0.5*(sig[:, :,3] - sig[:,:, 4])
 
-        self.labels = areas[:,None]
+        self.labels = areas[:,:,None]
 
     def get_e3(self):
         # second excentricity
