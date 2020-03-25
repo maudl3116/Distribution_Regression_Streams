@@ -90,7 +90,11 @@ class Ellipsis():
         self.e2 = np.sqrt(np.maximum(self.b, self.a) ** 2 / np.minimum(self.b, self.a) ** 2 -1. )
         self.labels = self.e2
 
-    def get_area(self):
+    def get_math_area(self):
+
+        self.labels = np.pi*self.a*self.b
+
+    def get_sig_area(self):
 
         sig = iisignature.sig(self.paths,2)
         # 12-21 <-> (for a 2d path) 3-4   [1,2|11,12,21,22]
@@ -170,7 +174,8 @@ class Ellipsis():
 
 
         order = np.argsort(self.labels[:,0])
-        samples = np.arange(0,len(order),int(self.N_bags/(N)))
+        samples = np.arange(0,len(order),int(len(order)/N)+1)
+        samples = samples[:N]
 
 
         for i in range(len(samples)):

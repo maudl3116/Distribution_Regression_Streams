@@ -80,6 +80,8 @@ class Area():
         self.pathwise_sig = pathwise_sig
         self.paths_seq = np.array(self.paths_seq)
 
+
+
     def add_dim_process(self):
 
         self.path_aug_time = np.concatenate((self.new_dim, self.path), axis=1)
