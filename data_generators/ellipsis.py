@@ -92,11 +92,12 @@ class Ellipsis():
 
     def get_area(self):
 
-        sig = np.concatenate([iisignature.sig(self.paths,2)] ,axis=1)
+        sig = iisignature.sig(self.paths,2)
         # 12-21 <-> (for a 2d path) 3-4   [1,2|11,12,21,22]
+
         areas = 0.5*(sig[:, :,3] - sig[:,:, 4])
 
-        self.labels = areas[:,None]
+        self.labels = areas
 
     def get_e3(self):
         # second excentricity
