@@ -162,6 +162,7 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
 
     x_train_torch = torch.tensor(x_train,dtype=torch.float64,device=device)
     x_test_torch = torch.tensor(x_test, dtype=torch.float64, device=device)
+    print(x_train_torch.shape)
 
     if RBF:
         model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d, level_sig, param_init[0], param_init[1], param_init[2],param_list = ['lengthscale', 'variance', 'noise'], device=device)
