@@ -75,7 +75,7 @@ def train(model, training_iter, RBF=False, plot=False):
             # print(np.abs(losses[i].detach().numpy()-losses[i-1].detach().numpy()))
             if plot:
                 already_plot = True
-                print(model.lengthscales)
+                print(model.lengthscale)
                 plt.plot(losses)
                 plt.xlabel('epoch')
                 plt.ylabel('negative marginal log likelihood')
@@ -84,6 +84,7 @@ def train(model, training_iter, RBF=False, plot=False):
             break
         optimizer.step()
     if plot and not already_plot:
+        print(model.lengthscale)
         plt.plot([e[0].cpu().detach().numpy() for e in losses])
         plt.show()
 
