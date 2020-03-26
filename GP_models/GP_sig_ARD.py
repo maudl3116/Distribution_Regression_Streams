@@ -209,6 +209,7 @@ class GP():
             x2=x1
 
         tf_lengthscales = self.get_lengthscales()
+        print(tf_lengthscales)
 
         # x is of shape [N_bags x T x N_items]
 
