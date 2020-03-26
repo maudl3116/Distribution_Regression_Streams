@@ -202,7 +202,7 @@ class GP():
     def get_lengthscales(self):
 
         tf_lengthscales = self.transform_softplus(self.lengthscale)
-        l = torch.cat([e.repeat(self.d**(i)) for i,e in enumerate(tf_lengthscales)])
+
 
         return torch.cat([e.repeat(self.d**(i)) for i,e in enumerate(tf_lengthscales)])
 
@@ -212,7 +212,7 @@ class GP():
             x2=x1
 
         tf_lengthscales = self.get_lengthscales()
-
+        print('hi',tf_lengthscales)
 
         # x is of shape [N_bags x T x N_items]
 
