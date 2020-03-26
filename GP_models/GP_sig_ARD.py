@@ -143,7 +143,8 @@ class GP():
         self.params.append(self.mean_constant)
 
         if 'lengthscale' in param_list:
-            self.lengthscale = torch.nn.Parameter(torch.randn(self.level_sig, dtype=self.dtype, device=self.device))
+            #self.lengthscale = torch.nn.Parameter(torch.randn(self.level_sig, dtype=self.dtype, device=self.device))
+            self.lengthscale = torch.nn.Parameter(torch.ones(self.level_sig, dtype=self.dtype, device=self.device))
             self.params.append(self.lengthscale)
         else:
             self.lengthscale = l_init * torch.ones(1, dtype=self.dtype, device=self.device)
