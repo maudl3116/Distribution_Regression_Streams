@@ -1,0 +1,11 @@
+﻿Colonne;Type ;Description_FR;Description_EN;Exemple
+dep;integer;Département;Department;1
+jour;string($date);Date de notification ;Date of notice;10/03/2020
+clage_covid;string ;Tranche d'âge des patients ;Age group of patients ;A
+nb_test;integer;Nombre de tests pour recherche de SARS-CoV-2;Number of tests for SARS-CoV-2 search;1
+nb_pos;integer;Nombre de tests positifs pour recherche de SARS-CoV-2;Number of positive tests for SARS-CoV-2 ;1
+tx_pos;integer;Taux de tests positif pour recherche de SARS-CoV-2;Positive test rate for SARS-CoV-2 search;2
+nb_test_h;integer;Nombre de tests pour recherche de SARS-CoV-2 - Hommes;Number of tests for SARS-CoV-2 search - Male;1
+nb_pos_h;integer;Nombre de tests positifs pour recherche de SARS-CoV-2 - Hommes;Number of positive tests for SARS-CoV-2 - Male;1
+nb_test_f;integer;Nombre de tests pour recherche de SARS-CoV-2 - Femmes;Number of tests for SARS-CoV-2 search - Female;1
+nb_pos_f;integer;Nombre de tests positifs pour recherche de SARS-CoV-2 - Femmes;Number of positive tests for SARS-CoV-2 - Female;1

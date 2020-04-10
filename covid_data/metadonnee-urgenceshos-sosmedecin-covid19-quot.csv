@@ -1,0 +1,20 @@
+﻿Métadonnées fichier SOS medecin et urgences hopitalières;;;;
+Colonne;Type ;Description_FR;Description_EN;Exemple
+dep;integer;Departement ;Department;02
+date_de_passage;string($date);Date de passage ;Date of notice;2020-02-24
+sursaud_cl_age_corona;integer;Tranche d'âge des patients ;Age group;0
+nbre_pass_corona;integer;Nombre de passages aux urgences pour suspicion de COVID-19 ;Number of emergency room visits for suspicion of COVID-19 ;0
+nbre_pass_tot;integer;Nombre de passages aux urgences total ;Total amount of emergency room visits ;453
+nbre_hospit_corona;integer;Nombre d'hospitalisations parmi les passages aux urgences pour suspicion de COVID-19 ;Number of hospitalizations among emergency department visits for suspicion of COVID-19 ;0
+nbre_pass_corona_h;integer;Nombre de passages aux urgences pour suspicion de COVID-19  - Hommes;Number of emergency room visits for suspicion of COVID-19 - Males;0
+nbre_pass_corona_f;integer;Nombre de passages aux urgences pour suspicion de COVID-19  - Femmes;Number of emergency room visits for suspicion of COVID-19  - Females;0
+nbre_pass_tot_h;integer;Nombre de passages aux urgences total - Hommes;Total amount of emergency room visits - Males;242
+nbre_pass_tot_f;integer;Nombre de passages aux urgences total - Femmes;Total amount of emergency room visits - Females;211
+nbre_hospit_corona_h;integer;Nombre d'hospitalisations parmi les passages aux urgences pour suspicion de COVID-19  - Hommes;Number of hospitalizations among emergency department visits for suspicion of COVID-19  - Males;0
+nbre_hospit_corona_f;integer;Nombre d'hospitalisations parmi les passages aux urgences pour suspicion de COVID-19 - Femmes;Number of hospitalizations among emergency department visits for suspicion of COVID-19  - Males;0
+nbre_acte_corona;integer;Nombres d'actes médicaux SOS Médecins pour suspicion de COVID-19;Number of medical acts (SOS Médecin) for suspicion of COVID-19;0
+nbre_acte_tot;integer;Nombres d'actes médicaux SOS Médecins total;Total amount of medical acts (SOS Médecin) ;382
+nbre_acte_corona_h;integer;Nombres d'actes médicaux SOS Médecins pour suspicion de COVID-19 - Hommes;Number of medical acts (SOS Médecin) for suspicion of COVID-19 - Males;0
+nbre_acte_corona_f;integer;Nombres d'actes médicaux SOS Médecins pour suspicion de COVID-19 - Femmes;Number of medical acts (SOS Médecin) for suspicion of COVID-19 - Females;0
+nbre_acte_tot_h;integer;Nombres d'actes médicaux SOS Médecins total - Hommes;Total amount of medical acts (SOS Médecin) - Males;174
+nbre_acte_tot_f;integer;Nombres d'actes médicaux SOS Médecins total - Femmes;Total amount of medical acts (SOS Médecin) - Females;208

@@ -55,7 +55,7 @@ def poly(x,psi,coef,level_sig):
 def scale_path_ilya(X,level_sig,M,a, return_norms=False):
 
     maxi = M*(1.+1./a)
-    print('maxi',maxi)
+    #print('maxi',maxi)
 
 
     bags_before = []
@@ -87,10 +87,10 @@ def scale_path_ilya(X,level_sig,M,a, return_norms=False):
     else:
         return np.array(expected_sig)
 
-def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
+def scaled_expected_sig(X,level_sig,M=1,a=1, ilya_rescale=False, return_norms=False):
     expected_sig = []
     maxi = M*(1.+1./a)
-    print('maxi',maxi)
+    #print('maxi',maxi)
 
 
     bags_before = []
@@ -137,7 +137,7 @@ def scaled_expected_sig(X,level_sig,M,a, ilya_rescale, return_norms=False):
 
 
 
-def scaled_pathwise_expected_iisignature(X,level_sig, M,a, ilya_rescale=False, return_norms=False):
+def scaled_pathwise_expected_iisignature(X,level_sig, M=1,a=1, ilya_rescale=False, return_norms=False):
     expected_sig = []
     maxi = M*(1.+1./a)
 

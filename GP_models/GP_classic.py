@@ -38,7 +38,7 @@ def plot_marginal_log_lik(model):
     plt.ylabel(r'$\sigma_n^2$')
     plt.show()
 
-def train(model, training_iter, plot=False):
+def train(model, training_iter, plot=False,ax=None):
 
     #print('transf. var',model.transform_softplus(model.variance))
     #print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
@@ -59,10 +59,9 @@ def train(model, training_iter, plot=False):
             # print(np.abs(losses[i].detach().numpy()-losses[i-1].detach().numpy()))
             if plot:
                 already_plot = True
-                plt.plot(losses,color='blue')
-                plt.xlabel('epoch')
-                plt.ylabel('negative marginal log likelihood')
-                plt.show()
+                ax.plot(losses,color='blue')
+                ax.set_xlabel('epoch')
+                ax.set_ylabel('NMLL')
                 #print('transf. var',model.transform_softplus(model.variance))
                 #print('transf. noise',model.transform_softplus(model.noise_obs,1e-4))
                 #print('transf. lengtshcale',model.transform_softplus(model.lengthscale))
@@ -70,8 +69,8 @@ def train(model, training_iter, plot=False):
         optimizer.step()
     if plot and not already_plot:
        
-        plt.plot([e[0].cpu().detach().numpy() for e in losses])
-        plt.show()
+        ax.plot([e[0].cpu().detach().numpy() for e in losses],color='blue')
+        #plt.show()
 
 
 class GP():

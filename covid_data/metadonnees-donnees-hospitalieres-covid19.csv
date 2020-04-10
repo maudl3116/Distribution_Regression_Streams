@@ -1,0 +1,8 @@
+Colonne;Type ;Description_FR;Description_EN;Exemple
+dep;integer;Département;Department;1
+sexe;integer;Sexe ;Sex ;0
+jour;string($date);Date de notification ;Date of notice;18/03/2020
+hosp;integer;Nombre de personnes actuellement hospitalisées;Number of people currently hospitalized;2
+rea;integer;Nombre de personnes actuellement en réanimation ou soins intensifs;Number of people currently in resuscitation or critical care;0
+rad;integer;Nombre cumulé de personnes retournées à domicile;Total amount of patient that returned home;1
+dc;integer;Nombre cumulé de personnes décédées à l'hôpital;Total amout of deaths at the hospital;0

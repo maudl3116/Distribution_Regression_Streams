@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c2034038-6af2-4e83-85f7-1ef56c863be2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/GP_models/GP_sig_ARD.py" beforeDir="false" afterPath="$PROJECT_DIR$/GP_models/GP_sig_ARD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GP_models/GP_classic.py" beforeDir="false" afterPath="$PROJECT_DIR$/GP_models/GP_classic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GP_models/GP_sig_precomputed.py" beforeDir="false" afterPath="$PROJECT_DIR$/GP_models/GP_sig_precomputed.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_generators/SDE.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_generators/SDE.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_generators/closed_form_SDEs.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_generators/closed_form_SDEs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/signature_features.py" beforeDir="false" afterPath="$PROJECT_DIR$/signature_features.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,24 +17,12 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/experiments.py">
+        <entry file="file://$PROJECT_DIR$/GP_models/GP_sig_precomputed.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="164" selection-start-line="164" selection-end-line="164" />
-              <folding>
-                <element signature="e#0#45#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/GP_models/GP_sig_ARD.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="291">
-              <caret line="213" column="46" lean-forward="true" selection-start-line="213" selection-start-column="46" selection-end-line="213" selection-end-column="46" />
+            <state relative-caret-position="361">
+              <caret line="80" selection-start-line="80" selection-end-line="82" selection-end-column="37" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -37,7 +30,104 @@
           </provider>
         </entry>
       </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/GP_models/GP_classic.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="427">
+              <caret line="72" column="9" selection-start-line="72" selection-start-column="9" selection-end-line="72" selection-end-column="9" />
+              <folding>
+                <element signature="e#0#12#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data_generators/SDE.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="401">
+              <caret line="84" column="80" selection-start-line="84" selection-start-column="8" selection-end-line="84" selection-end-column="80" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data_generators/ellipsis.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="26" selection-start-line="26" selection-end-line="26" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data_generators/curves.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1155">
+              <caret line="77" selection-start-line="77" selection-end-line="77" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/experiments.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="358">
+              <caret line="85" column="9" selection-start-line="85" selection-start-column="9" selection-end-line="85" selection-end-column="9" />
+              <folding>
+                <element signature="e#0#45#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/signature_features.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="66">
+              <caret line="135" selection-start-line="135" selection-end-line="135" />
+              <folding>
+                <element signature="e#0#45#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="194">
+              <caret line="52" column="82" selection-start-line="52" selection-start-column="52" selection-end-line="52" selection-end-column="82" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>self.level_sig</find>
+      <find>print</find>
+      <find>get_norm_level_sig</find>
+      <find>scaled_exp</find>
+      <find>scaled_expected_sig</find>
+      <find>item</find>
+      <find>maxi</find>
+      <find>scaled_pa</find>
+      <find>s</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -45,8 +135,21 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/experiments.py" />
         <option value="$PROJECT_DIR$/GP_models/GP_sig_ARD.py" />
+        <option value="$PROJECT_DIR$/signature_features_covid.py" />
+        <option value="$PROJECT_DIR$/utils_covid.py" />
+        <option value="$PROJECT_DIR$/data_generators/graphs.py" />
+        <option value="$PROJECT_DIR$/../Distribution_Regression_Yield/code/signature_features_helper.py" />
+        <option value="$PROJECT_DIR$/../Distribution_Regression_Yield/code/models/GP_sig_precomputed.py" />
+        <option value="$PROJECT_DIR$/../Distribution_Regression_Yield/code/train.py" />
+        <option value="$PROJECT_DIR$/../Distribution_Regression_Yield/code/featurize.py" />
+        <option value="$PROJECT_DIR$/data_generators/closed_form_SDEs.py" />
+        <option value="$PROJECT_DIR$/data_generators/SDE.py" />
+        <option value="$PROJECT_DIR$/GP_models/GP_sig_precomputed.py" />
+        <option value="$PROJECT_DIR$/signature_features.py" />
+        <option value="$PROJECT_DIR$/experiments.py" />
+        <option value="$PROJECT_DIR$/data_generators/curves.py" />
+        <option value="$PROJECT_DIR$/GP_models/GP_classic.py" />
       </list>
     </option>
   </component>
@@ -76,6 +179,11 @@
             <path>
               <item name="Distribution_Regression_Streams" type="b2602c69:ProjectViewProjectNode" />
               <item name="Distribution_Regression_Streams" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Distribution_Regression_Streams" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Distribution_Regression_Streams" type="462c0819:PsiDirectoryNode" />
+              <item name="data_generators" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Distribution_Regression_Streams" type="b2602c69:ProjectViewProjectNode" />
@@ -120,18 +228,19 @@
       <option name="presentableId" value="Default" />
       <updated>1584741407011</updated>
       <workItem from="1584741408402" duration="150000" />
-      <workItem from="1585209508110" duration="437000" />
+      <workItem from="1585209508110" duration="30005000" />
+      <workItem from="1586437861689" duration="15420000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="587000" />
+    <option name="totallyTimeSpent" value="45575000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="716" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2536349" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25767368" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -145,7 +254,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32852563" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -158,20 +267,207 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/experiments.py">
+    <entry file="file://$PROJECT_DIR$/GP_models/GP_sig_ARD.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="164" selection-start-line="164" selection-end-line="164" />
+        <state relative-caret-position="1021">
+          <caret line="206" column="87" lean-forward="true" selection-start-line="206" selection-start-column="15" selection-end-line="206" selection-end-column="87" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/signature_features_covid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="377">
+          <caret line="137" column="13" selection-start-line="137" selection-start-column="13" selection-end-line="137" selection-end-column="13" />
           <folding>
             <element signature="e#0#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GP_models/GP_sig_ARD.py">
+    <entry file="file://$PROJECT_DIR$/experiment_script.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="291">
-          <caret line="213" column="46" lean-forward="true" selection-start-line="213" selection-start-column="46" selection-end-line="213" selection-end-column="46" />
+        <state relative-caret-position="45">
+          <caret line="3" column="18" lean-forward="true" selection-start-line="3" selection-start-column="18" selection-end-line="3" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../mini-project2/fully-invertible-revnet/train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-770">
+          <caret line="74" selection-start-line="74" selection-end-line="74" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Distribution_Regression_Yield/code/featurize.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="158">
+          <caret line="33" column="47" selection-start-line="33" selection-start-column="47" selection-end-line="33" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Distribution_Regression_Yield/code/signature_features_helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="481">
+          <caret line="167" column="23" selection-start-line="167" selection-start-column="23" selection-end-line="167" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Distribution_Regression_Yield/code/get_stratified_folds.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="28">
+          <caret line="27" selection-start-line="27" selection-end-line="27" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Distribution_Regression_Yield/code/train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="274">
+          <caret line="48" column="106" selection-start-line="48" selection-start-column="106" selection-end-line="48" selection-end-column="106" />
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Distribution_Regression_Yield/code/models/GP_sig_precomputed.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="49">
+          <caret line="42" column="25" selection-start-line="42" selection-start-column="25" selection-end-line="42" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils_covid.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" selection-start-line="4" selection-end-line="4" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/graphs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="569">
+          <caret line="65" column="26" selection-start-line="65" selection-start-column="26" selection-end-line="65" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/Lotka_Volterra.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/area.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" column="29" lean-forward="true" selection-end-line="116" selection-end-column="73" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/closed_form_SDEs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/signature_features.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="135" selection-start-line="135" selection-end-line="135" />
+          <folding>
+            <element signature="e#0#45#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="194">
+          <caret line="52" column="82" selection-start-line="52" selection-start-column="52" selection-end-line="52" selection-end-column="82" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GP_models/GP_sig_precomputed.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="80" selection-start-line="80" selection-end-line="82" selection-end-column="37" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiments.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="358">
+          <caret line="85" column="9" selection-start-line="85" selection-start-column="9" selection-end-line="85" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#45#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/ellipsis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/SDE.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="401">
+          <caret line="84" column="80" selection-start-line="84" selection-start-column="8" selection-end-line="84" selection-end-column="80" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_generators/curves.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1155">
+          <caret line="77" selection-start-line="77" selection-end-line="77" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GP_models/GP_classic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="427">
+          <caret line="72" column="9" selection-start-line="72" selection-start-column="9" selection-end-line="72" selection-end-column="9" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>

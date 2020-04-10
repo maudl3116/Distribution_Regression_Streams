@@ -57,7 +57,8 @@ def matprint(mat, fmt="g"):
             print(("{:"+str(col_maxes[i])+fmt+"}").format(y), end="  ")
         print("")
 
-def train(model,training_iter,RBF=False,plot=False):
+def train(model,training_iter,RBF=False,plot=False,ax=None):
+
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
@@ -77,10 +78,10 @@ def train(model,training_iter,RBF=False,plot=False):
             # print(np.abs(losses[i].detach().numpy()-losses[i-1].detach().numpy()))
             if plot:
                 already_plot = True
-                plt.plot(losses)
-                plt.xlabel('epoch')
-                plt.ylabel('negative marginal log likelihood')
-                plt.show()
+                ax.plot(losses,color='blue')
+                ax.set_xlabel('epoch')
+                ax.set_ylabel('NMLL')
+                #plt.show()
 
             break
         optimizer.step()

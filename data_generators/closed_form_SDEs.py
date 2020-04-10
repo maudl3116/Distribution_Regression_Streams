@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from fbm import FBM
 
+
 class SDE_FBM():
 
     # equation: x^2/a^2 + y^2/b^2 = 1
