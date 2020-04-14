@@ -8,7 +8,7 @@ import utils
 # import iisignature
 # from fbm import FBM
 # import gpytorch
-# import torch
+import torch
 
 class sde():
 
