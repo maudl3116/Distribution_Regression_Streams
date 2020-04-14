@@ -4,12 +4,12 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.preprocessing import QuantileTransformer
 from addtime import AddTime, LeadLag
 from numpy import math
-import torch
-import gpytorch
-from gpytorch.kernels import RBFKernel
-from torch.autograd import Variable
-from gpytorch.kernels import Kernel, RBFKernel
-from gpytorch.kernels.kernel import Kernel
+#import torch
+#import gpytorch
+#from gpytorch.kernels import RBFKernel
+#from torch.autograd import Variable
+#from gpytorch.kernels import Kernel, RBFKernel
+#from gpytorch.kernels.kernel import Kernel
 import pandas as pd
 
 def split_standardize(y,data,standardized=True,method = 'standard'):
@@ -152,14 +152,3 @@ def brownian(steps, width, time=1.):
     return path
 
 
-class ExactGPModel(gpytorch.models.ExactGP):
-    def __init__(self, train_x, train_y, likelihood, mean, kernel):
-        super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
-        self.mean_module = mean
-
-        self.covar_module = kernel
-
-    def forward(self, x):
-        mean_x = self.mean_module(x)
-        covar_x = self.covar_module(x)
-        return gpytorch.distributions.MultivariateNormal(mean_x, covar_x)

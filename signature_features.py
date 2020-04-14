@@ -6,9 +6,9 @@ from scipy.optimize import brentq as brentq
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import iisignature
-import torch
+#import torch
 import numpy as np
-import signatory
+#import signatory
 
 def expected_sig(X,level_sig):
     expected_sig = []
