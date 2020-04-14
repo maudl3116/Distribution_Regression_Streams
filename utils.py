@@ -14,7 +14,7 @@ import pandas as pd
 
 def split_standardize(y,data,standardized=True,method = 'standard'):
     # 3. GET STRATIFIED SPLITS
-
+    print('hey')
     y = np.array(y)
 
     if method=='extrapolation':
