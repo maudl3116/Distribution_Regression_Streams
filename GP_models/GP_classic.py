@@ -14,7 +14,7 @@ import math
 from matplotlib.pyplot import imshow, show, colorbar
 
 
-def train(model, training_iter, plot=False,path=None):
+def train(model, training_iter, plot=False):
 
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
@@ -33,8 +33,7 @@ def train(model, training_iter, plot=False,path=None):
                 plt.plot(losses)
                 plt.xlabel('epoch')
                 plt.ylabel('negative marginal log likelihood')
-                plt.savefig(path+'/loss.pdf')
-                plt.close(fig)
+                plt.show()
             break
         optimizer.step()
     if plot and not already_plot:
@@ -42,8 +41,7 @@ def train(model, training_iter, plot=False,path=None):
         plt.plot([e[0].cpu().detach().numpy() for e in losses],color='blue')
         plt.xlabel('epoch')
         plt.ylabel('negative marginal log likelihood')
-        plt.savefig(path + '/loss.pdf')
-        plt.close(fig)
+        plt.show()
 
 
 

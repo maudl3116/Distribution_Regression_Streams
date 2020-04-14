@@ -35,7 +35,7 @@ def train(model, training_iter, plot=False,path=None):
                 plt.xlabel('epoch')
                 plt.ylabel('negative marginal log likelihood')
                 plt.savefig(path+'/loss.pdf')
-                plt.close(fig)
+                plt.show()
 
             break
         optimizer.step()
@@ -45,7 +45,7 @@ def train(model, training_iter, plot=False,path=None):
         plt.xlabel('epoch')
         plt.ylabel('negative marginal log likelihood')
         plt.savefig(path + '/loss.pdf')
-        plt.close(fig)
+        plt.show()
 
 
 
