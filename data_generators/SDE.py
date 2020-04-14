@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import sys
 sys.path.append('../')
 import utils
-import iisignature
+# import iisignature
 # from fbm import FBM
 # import gpytorch
 # import torch
