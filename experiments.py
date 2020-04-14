@@ -53,7 +53,7 @@ def loss_sig(K_precomputed, y, train_index, test_index):
 
 
 
-def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],plot=False,device=torch.device("cpu")):
+def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],plot=False,device=torch.device("cuda")):
 
     if plot:
         sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 1.5})
