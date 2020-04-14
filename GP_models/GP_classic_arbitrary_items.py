@@ -14,7 +14,7 @@ import math
 from matplotlib.pyplot import imshow, show, colorbar
 
 
-def train(model, training_iter, plot=False,path=None):
+def train(model, training_iter, plot=False,ax=None):
 
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []

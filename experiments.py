@@ -180,7 +180,7 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
     else:
         model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d,level_sig, param_init[0], param_init[1], param_init[2], param_list = ['lengthscale', 'noise'], device=device)
 
-    GP_sig_ARD.train(model, 2000, RBF=RBF, plot=plot)
+    GP_sig_ARD.train(model, 2000, RBF=RBF, plot=plot, ax=axs[0])
     print(torch.max(model.K))
     print(torch.min(model.K))
 
