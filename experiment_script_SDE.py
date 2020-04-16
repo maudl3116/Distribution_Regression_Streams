@@ -45,8 +45,8 @@ def exp(N_MC,N_bags=100, N_items=30, tspan=np.linspace(0,1,200),spec_param = {'t
             input_ = X_aug
             N = np.array(input_).shape[3]
             input_ = np.concatenate([np.array(np.array(input_)[:, :, :, k]) for k in range(N)], axis=2)
-            train_RBF_rmse, train_RBF_r2, test_RBF_rmse, test_RBF_r2 = experiments.naive_experiment(input_, y_scaled, train_indices, test_indices,
-                                                               param_init=[5, 1, 0],device=device)
+            train_RBF_rmse, train_RBF_r2, test_RBF_rmse, test_RBF_r2 = experiments.naive_experiment(input_, y_scaled, train_indices, test_indices,ARD=False,
+                                                               param_init=[10, 0, 0],device=device)
 
 
             ''' GP SIG '''
