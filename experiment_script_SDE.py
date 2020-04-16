@@ -26,6 +26,7 @@ def exp(N_MC,N_bags=100, N_items=30, tspan=np.linspace(0,1,200),spec_param = {'t
 
 
     for i in range(N_MC):
+        print(i)
         for j,param in enumerate(params):
 
             ''' GENERATE DATA '''

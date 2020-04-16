@@ -14,7 +14,6 @@ import pandas as pd
 
 def split_standardize(y,data,standardized=True,method = 'standard'):
     # 3. GET STRATIFIED SPLITS
-    print('hey')
     y = np.array(y)
 
     if method=='extrapolation':
@@ -31,7 +30,7 @@ def split_standardize(y,data,standardized=True,method = 'standard'):
         train, test, _, _ = train_test_split(np.arange(len(y)), np.array(y), shuffle=True, test_size=1. /3,
                                              random_state=0)
     elif method == 'stratify':
-        bins = np.linspace(-0.01+min(y[:,0]), max(y[:,0])+0.01, 5)
+        bins = np.linspace(-0.01+min(y[:,0]), max(y[:,0])+0.01, 3)
 
         y_binned = np.digitize(y[:,0], bins)
 
