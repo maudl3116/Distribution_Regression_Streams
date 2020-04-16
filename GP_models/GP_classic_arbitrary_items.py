@@ -12,7 +12,7 @@ from tqdm import tqdm
 #from tqdm.notebook import trange, tqdm
 import math
 from matplotlib.pyplot import imshow, show, colorbar
-n
+
 
 def train(model, training_iter, plot=False,path=None):
 
