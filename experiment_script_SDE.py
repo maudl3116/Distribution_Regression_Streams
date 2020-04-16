@@ -51,7 +51,7 @@ def exp(N_MC,N_bags=100, N_items=30, tspan=np.linspace(0,1,200),spec_param = {'t
 
 
             ''' GP SIG '''
-            sig_level = 3
+            sig_level = 2
 
             # Compute the expected signature
             expected_sig = signature_features.scaled_expected_sig([e.copy() for e in X_aug], sig_level)
