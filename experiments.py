@@ -106,7 +106,7 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
     #                                    stdv_test)
     #plt.show()
 
-    return RMSE_train, R2_train, RMSE_test, R2_test, mu_test
+    return RMSE_train, R2_train, RMSE_test, R2_test
 
 def experiment_precomputed(K_precomputed, y, train_index, test_index, param_init=[0,0,0],RBF=False,plot=False,device=torch.device("cpu")):
 
