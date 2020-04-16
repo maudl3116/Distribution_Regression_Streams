@@ -55,8 +55,8 @@ def matprint(mat, fmt="g"):
         print("")
 
 
-def train(model, training_iter, RBF=False, plot=False):
-    optimizer = torch.optim.Adam(model.params, lr=0.1)
+def train(model, training_iter, RBF=False, plot=False,ax=None):
+    optimizer = torch.optim.Adam(model.params, lr=0.01)
     losses = []
     already_plot = False
     for i in tqdm(np.arange(training_iter)):
@@ -76,17 +76,17 @@ def train(model, training_iter, RBF=False, plot=False):
             if plot:
                 already_plot = True
                 print(model.lengthscale)
-                plt.plot(losses)
-                plt.xlabel('epoch')
-                plt.ylabel('negative marginal log likelihood')
-                plt.show()
+                ax.plot(losses)
+                ax.set_xlabel('epoch')
+                ax.set_ylabel('negative marginal log likelihood')
+
 
             break
         optimizer.step()
     if plot and not already_plot:
         print(model.lengthscale)
-        plt.plot([e[0].cpu().detach().numpy() for e in losses])
-        plt.show()
+        ax.plot([e[0].cpu().detach().numpy() for e in losses])
+        #plt.show()
 
 
 def plot_marginal_log_lik(model):
@@ -126,6 +126,7 @@ class GP():
         # constants (except K)
         self.Y = Y
         self.training_data = X
+
         self.n = len(X)
 
         # d is the dimension of the paths before taking their signature
@@ -203,8 +204,7 @@ class GP():
 
         tf_lengthscales = self.transform_softplus(self.lengthscale)
 
-
-        return torch.cat([e.repeat(self.d**(i)) for i,e in enumerate(tf_lengthscales)])
+        return torch.cat([e.repeat(self.d**(i+1)) for i,e in enumerate(tf_lengthscales)])
 
     def K_RBF_eval(self,x1,x2=None):
 

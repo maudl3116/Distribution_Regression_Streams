@@ -174,6 +174,10 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
     x_train_torch = torch.tensor(x_train,dtype=torch.float64,device=device)
     x_test_torch = torch.tensor(x_test, dtype=torch.float64, device=device)
 
+    if plot:
+        sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 1.5})
+        fig, axs = plt.subplots(1, 3, figsize=(35, 7))
+        axs = axs.ravel()
 
     if RBF:
         model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d, level_sig, param_init[0], param_init[1], param_init[2],param_list = ['lengthscale', 'variance', 'noise'], device=device)
@@ -198,10 +202,8 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
     #regression_models.plot_fit(axs[0], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
 
     if plot:
-        fig, axs = plt.subplots(1, 2, figsize=(25, 7))
-        axs = axs.ravel()
-        plot_fit(axs[0], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
-        plot_fit(axs[1], y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
+        plot_fit(axs[1], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
+        plot_fit(axs[2], y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
         plt.show()
     #fig = plt.figure(figsize=(25, 7))
     #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train,y_test[:, 0], mu_test[:, 0], stdv_test)

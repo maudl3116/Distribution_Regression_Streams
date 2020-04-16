@@ -51,7 +51,7 @@ def split_standardize(y,data,standardized=True,method = 'standard'):
         to_transform = np.array([data[i].copy() for i in range(len(y))]).reshape(-1, data[0][0].shape[1])
         data_scaled = scaler.transform(to_transform).reshape(np.array(data).shape)
 
-        scaler = QuantileTransformer(n_quantiles=10, random_state=0)
+        scaler = QuantileTransformer(n_quantiles=5, random_state=0)
         to_fit = y[train]
         scaler.fit(to_fit)
 
