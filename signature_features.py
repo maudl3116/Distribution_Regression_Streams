@@ -5,7 +5,7 @@ from sklearn.model_selection import StratifiedKFold
 from scipy.optimize import brentq as brentq
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-#import iisignature
+import iisignature
 #import torch
 import numpy as np
 #import signatory
