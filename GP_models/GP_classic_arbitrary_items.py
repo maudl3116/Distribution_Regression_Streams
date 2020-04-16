@@ -12,9 +12,9 @@ from tqdm import tqdm
 #from tqdm.notebook import trange, tqdm
 import math
 from matplotlib.pyplot import imshow, show, colorbar
+n
 
-
-def train(model, training_iter, plot=False,ax=None):
+def train(model, training_iter, plot=False,path=None):
 
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
@@ -35,7 +35,7 @@ def train(model, training_iter, plot=False,ax=None):
                 plt.xlabel('epoch')
                 plt.ylabel('negative marginal log likelihood')
                 plt.savefig(path+'/loss.pdf')
-                plt.show()
+                plt.close(fig)
 
             break
         optimizer.step()
@@ -45,7 +45,7 @@ def train(model, training_iter, plot=False,ax=None):
         plt.xlabel('epoch')
         plt.ylabel('negative marginal log likelihood')
         plt.savefig(path + '/loss.pdf')
-        plt.show()
+        plt.close(fig)
 
 
 
@@ -99,16 +99,17 @@ class GP():
 
 
     def pad_mask(self,X):
+
         nb_pixels_list = [e.shape[1] for e in X]
         max_pixels = torch.max(torch.tensor(nb_pixels_list))
         self.n_items = max_pixels
         
         # pad with nans
         padded = [torch.cat((e,  torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=self.dtype, device=self.device)),
-            axis=1)[None, :, :] if e.shape[1]<max_pixels else e for e in X]
+            axis=1)[None, :, :] if e.shape[1]<max_pixels else e[None,:,:] for e in X]
 
         padded_mask = [torch.cat((e,  np.nan*torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=self.dtype, device=self.device)),
-            axis=1)[None, :, :] if e.shape[1]<max_pixels else e for e in X]
+            axis=1)[None, :, :] if e.shape[1]<max_pixels else e[None,:,:] for e in X]
         training_data = torch.cat(padded)
         mask = torch.cat(padded_mask)
 
