@@ -66,7 +66,7 @@ def exp(N_MC,N_bags=100, N_items=30, tspan=np.linspace(0,1,200),spec_param = {'t
             K_precomputed = experiments.precompute_K(features)
 
             # Train and Predict
-            train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 =experiments.experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices, RBF=False,
+            train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 =experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices, RBF=False,
                                                plot=False,device=device)
 
             ''' STORE THE RESULTS '''
