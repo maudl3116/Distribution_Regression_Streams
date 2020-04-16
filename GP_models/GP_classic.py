@@ -20,7 +20,7 @@ def train(model, training_iter, plot=False,ax=None):
     losses = []
     already_plot = False
 
-    for i in tqdm(np.arange(training_iter)):
+    for i in np.arange(training_iter):
         loss = model.obj()
         optimizer.zero_grad()
         loss.backward()
