@@ -82,8 +82,8 @@ class Circuit():
         # generate one path per bag
         paths_ref = np.zeros((self.N_bags, self.L, 2))
         for i in range(self.N_bags):
-            paths_ref[i, :, 0] = em * np.sin(omega[i] * self.t_span)
-            paths_ref[i, :, 1] = I_m * np.sin(omega[i] * self.t_span - np.arctan(tan_phi))
+            paths_ref[i, :, 0] = em[i] * np.sin(omega[i] * self.t_span)
+            paths_ref[i, :, 1] = I_m[i]* np.sin(omega[i] * self.t_span - np.arctan(tan_phi[i]))
         figure = plt.figure(figsize=(30, 10))
         plt.plot(self.t_span, paths_ref[0, :, 0])
         plt.plot(self.t_span, paths_ref[0, :, 1])
