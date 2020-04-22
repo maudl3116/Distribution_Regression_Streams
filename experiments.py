@@ -53,7 +53,7 @@ def loss_sig(K_precomputed, y, train_index, test_index):
 
 
 
-def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],plot=False,device=torch.device("cuda")):
+def naive_experiment(x, y, train_index, test_index,ARD=False,RBF_top=False,param_init=[0,0,0],plot=False,device=torch.device("cuda")):
 
     if plot:
         sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 1.5})
@@ -78,15 +78,15 @@ def naive_experiment(x, y, train_index, test_index,ARD=False,param_init=[0,0,0],
     x_test = torch.tensor(x_test, dtype=torch.float64,device=device).transpose(1, 2)
 
 
-    model = GP_naive.GP(x_train, torch.tensor(y_train, dtype=torch.float64), param_init[0], param_init[1],param_init[2],
+    model = GP_naive.GP(x_train, torch.tensor(y_train, dtype=torch.float64), param_init[0], param_init[1],param_init[2], param_init[3],
                             ['lengthscale', 'variance', 'noise'],ARD=ARD,device=device)
     if plot:
-        GP_naive.train(model, 2000, plot=plot,ax=axs[0])
+        GP_naive.train(model, 2000, RBF_top=RBF_top, plot=plot,ax=axs[0])
     else:
-        GP_naive.train(model, 2000)
+        GP_naive.train(model, 2000,RBF_top=RBF_top)
 
-    mu_test, stdv_test = model.predict(x_train, x_test)
-    mu_train, stdv_train = model.predict(x_train, x_train)
+    mu_test, stdv_test = model.predict(x_train, x_test,RBF_top=RBF_top)
+    mu_train, stdv_train = model.predict(x_train,RBF_top=RBF_top)
     R2_train = compute_r2(y_train[:, 0], mu_train[:, 0])
     R2_test = compute_r2(y_test[:, 0], mu_test[:, 0])
     RMSE_train = compute_rmse(y_train[:, 0], mu_train[:, 0])

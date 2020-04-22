@@ -54,7 +54,7 @@ class Area():
         fbm_sample2 = f.fbm()
         self.new_dim = fbm_sample2[:,None]
 
-    def get_area(self,path_aug='0',level=5,chunks=5):
+    def get_area(self,path_aug='3',level=5,chunks=5):
 
         if path_aug == '0':
             self.add_uniform_time()

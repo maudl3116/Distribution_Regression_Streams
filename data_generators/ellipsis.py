@@ -14,7 +14,7 @@ class Ellipsis():
         self.paths = None
         self.labels = None
 
-    def set_parameters(self,N_bags,N_items,t_span,spec_param,stdv_pos,stdv_noise):
+    def set_parameters(self,N_bags,N_items,t_span=None,spec_param=None,stdv_pos=None,stdv_noise=None):
         self.N_bags = N_bags
         self.N_items = N_items
         self.t_span = t_span
@@ -28,8 +28,6 @@ class Ellipsis():
         self.set_parameters(N_bags,N_items,t_span,spec_param,stdv_pos,stdv_noise)
 
         paths = []
-
-
 
         a = (spec_param['a'][1] - spec_param['a'][0]) * np.random.rand(N_bags) + spec_param['a'][0]*np.ones(N_bags)
         b = (spec_param['b'][1]-spec_param['b'][0])*np.random.rand(N_bags) + spec_param['b'][0]*np.ones(N_bags)
@@ -69,6 +67,60 @@ class Ellipsis():
                 # Does not make much sense
                     x = x + stdv_noise[i]*brownian(len(t_span) - 1, t_span[-1])[:, 0]
                     y = y + stdv_noise[i]*brownian(len(t_span) - 1, t_span[-1])[:, 0]
+
+                items.append(np.hstack([x[:,None],y[:,None]]))
+
+            paths.append(items)
+
+
+        self.paths = np.array(paths)
+        self.a = a[:,None]
+        self.b = b[:,None]
+        self.stdv_noise = stdv_noise[:,None]
+
+    def generate_data2(self,N_bags=100, N_items=15, nb_points=100, spec_param={'a':[1.,3.],'b':[1.,3.]},  noise='gaussian', stdv_noise=0):
+
+        self.set_parameters(N_bags,N_items,spec_param,stdv_noise)
+
+        paths = []
+
+        a = (spec_param['a'][1] - spec_param['a'][0]) * np.random.rand(N_bags) + spec_param['a'][0]*np.ones(N_bags)
+        b = (spec_param['b'][1]-spec_param['b'][0])*np.random.rand(N_bags) + spec_param['b'][0]*np.ones(N_bags)
+
+
+        init_time = (2*np.pi)*np.random.rand(N_bags,N_items)
+
+
+        if stdv_noise not in spec_param.keys():
+            stdv_noise = stdv_noise * np.ones(N_bags)
+        else:
+            stdv_noise = stdv_noise * np.random.randn(N_bags)
+
+
+        for i in range(N_bags):
+
+            items = []
+
+            for j in range(N_items):
+
+                time_item = np.linspace(init_time[i,j],2*np.pi+init_time[i,j],nb_points)
+
+                x = a[i] * np.cos(time_item)
+                y = b[i] * np.sin(time_item)
+
+                if noise=='gaussian':
+                    x = x +  stdv_noise[i]*np.random.randn(nb_points)
+                    y = y + stdv_noise[i]*np.random.randn(nb_points)
+                elif noise=='GP':
+                    mean = [0 for t in time_item]
+
+                    gram = gram_matrix(time_item,stdv_noise[0])
+                    gram = np.array(gram)
+
+                    x_noise = np.random.multivariate_normal(mean, gram)
+                    y_noise = x_noise
+                    x = x + x_noise
+                    y = y + y_noise
 
                 items.append(np.hstack([x[:,None],y[:,None]]))
 
@@ -196,6 +248,43 @@ class Ellipsis():
         plt.savefig('ellipsis.pdf')
         plt.show()
 
+    def plot2(self,N = 3, N_items=5):
+        sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 2.5})
+        #sns.set(font_scale=1)
+        fig, ax = plt.subplots(1,N, figsize=(N*5, 5))
+        ax = ax.ravel()
+        colors = ['dodgerblue','tomato']#N*['blue']#sns.color_palette("RdYlBu", N)
+        colors2 = sns.color_palette("RdYlBu", N_items)
+
+
+        order = np.argsort(self.labels[:,0])
+        samples = np.arange(0,len(order),int(len(order)/N)+1)
+        samples = samples[:N]
+
+
+
+        for i in range(len(samples)):
+
+            for item in range(N_items):
+                ax[i].plot(self.paths[order][samples[i]][item, :, 0].T, self.paths[order][samples[i]][item, :, 1].T, color=colors[item],linewidth=1)
+                marker_style = dict(color=colors[item], linestyle=':', marker='o',
+                                    markersize=10, markerfacecoloralt='tab:red',markeredgecolor='black')
+                ax[i].plot(self.paths[order][samples[i]][item, 0, 0], self.paths[order][samples[i]][item, 0, 1],**marker_style)
+                ax[i].set_title('label: %.2f' % self.labels[order][samples[i]])
+            ax[i].axhline(0,ls='--',color='black',linewidth=0.5)
+            ax[i].axvline(0,ls='--',color='black',linewidth=0.5)
+            ax[i].set_xlabel('$x^1(t)$')
+            ax[i].set_ylabel('$x^2(t)$')
+            ax[i].set_xlim([0-3.5,3.5])
+            ax[i].set_ylim([0-3.5,3.5])
+
+            #ax[i].scatter(self.pos_x[order][samples[i]],self.pos_y[order][samples[i]],marker='+',color='red',s=100,label=r'$(\alpha,\beta)$')
+            #ax[i].legend(loc='upper right')
+        plt.tight_layout()
+        plt.savefig('ellipsis.pdf')
+        plt.show()
+
+
     def plot_subsampled_paths(self,N = 3, N_items=5):
     
         sns.set(font_scale=1)
@@ -242,3 +331,8 @@ class Ellipsis():
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         plt.show()
 
+def rbf_kernel(x1, x2, variance=1,lengthscale=0.0001):
+    return variance*np.exp(-1 * ((x1 - x2) ** 2) / (2 * lengthscale))
+
+def gram_matrix(xs,variance):
+    return [[rbf_kernel(x1, x2,variance=variance) for x2 in xs] for x1 in xs]

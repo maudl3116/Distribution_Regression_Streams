@@ -51,7 +51,7 @@ def train(model, training_iter, plot=False,path=None):
 
 class GP():
 
-    def __init__(self, X, Y, l_init, var_init, noise_init, param_list,ARD=False,dtype=torch.float64,
+    def __init__(self, X, Y, l_init, var_init, noise_init, param_list=['lengthscale', 'variance', 'noise'],ARD=False,dtype=torch.float64,
                  device=torch.device("cpu")):
 
         self.device = device

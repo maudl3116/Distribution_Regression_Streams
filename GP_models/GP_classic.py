@@ -14,14 +14,17 @@ import math
 from matplotlib.pyplot import imshow, show, colorbar
 
 
-def train(model, training_iter, plot=False,ax=None):
+def train(model, training_iter,RBF_top=False, plot=False,ax=None):
 
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
 
     for i in np.arange(training_iter):
-        loss = model.obj()
+        if RBF_top:
+            loss = model.obj_RBF()
+        else:
+            loss = model.obj()
         optimizer.zero_grad()
         loss.backward()
         losses.append(loss)
@@ -45,7 +48,7 @@ def train(model, training_iter, plot=False,ax=None):
 
 class GP():
 
-    def __init__(self, X, Y, l_init, var_init, noise_init, param_list,ARD=False,dtype=torch.float64,
+    def __init__(self, X, Y, l_init, var_init, noise_init,l_init_top=None, param_list=['lengthscale', 'variance', 'noise'],ARD=False,dtype=torch.float64,
                  device=torch.device("cpu")):
 
         self.device = device
@@ -73,13 +76,17 @@ class GP():
                 self.lengthscale = torch.nn.Parameter(l_init * torch.ones(X.shape[1], dtype=self.dtype, device=self.device))
             else:
                 self.lengthscale = torch.nn.Parameter(l_init * torch.ones(1, dtype=self.dtype, device=self.device))
+                self.lengthscale_top = torch.nn.Parameter(l_init_top * torch.ones(1, dtype=self.dtype, device=self.device))
             self.params.append(self.lengthscale)
+            self.params.append(self.lengthscale_top)
         else:
             self.lengthscale = l_init * torch.ones(1, dtype=self.dtype, device=self.device)
 
         if 'variance' in param_list:
             self.variance = torch.nn.Parameter(var_init * torch.ones(1, dtype=self.dtype, device=self.device))
+            self.variance_top = torch.nn.Parameter(var_init * torch.ones(1, dtype=self.dtype, device=self.device))
             self.params.append(self.variance)
+            self.params.append(self.variance_top)
         else:
             self.variance = var_init * torch.ones(1, dtype=self.dtype, device=self.device)
 
@@ -99,8 +106,10 @@ class GP():
         tf_lengthscales = self.transform_softplus(self.lengthscale)
 
         # x is of shape [N_bags x T x N_items]
+
         x = x.div(tf_lengthscales[None,:,None])
         y = y.div(tf_lengthscales[None,:,None])
+
 
         yy = y.repeat(1, 1, self.n_items)
         xx = x.reshape(-1, 1).repeat(1, self.n_items).reshape(x.shape[0], x.shape[1], self.n_items**2)
@@ -120,6 +129,44 @@ class GP():
         else:
             return self.K_eval(X,Y)
 
+    def get_K_top_RBF(self, K,shape=None):
+
+
+        diag = torch.diag(K)
+
+        dist = -2. * K + diag.repeat(K.shape[0], 1) + diag[:, None].repeat(1, K.shape[1])
+
+        K_RBF = torch.exp(-0.5 * dist / (self.transform_softplus(self.lengthscale_top) ** 2))
+
+        if shape == None:
+            return K_RBF
+        else:
+            # train vs test
+            K_sliced = torch.zeros((shape,K_RBF.shape[0]-shape),device=self.device,dtype=self.dtype)
+            for i in range(shape):
+                for j in range(K_RBF.shape[0]-shape):
+
+                    K_sliced[i][j] = K_RBF[i, j+shape]
+            return K_sliced
+
+    def obj_RBF(self):
+
+        self.K = self.K_eval_full(self.training_data)
+
+        K = self.transform_softplus(self.variance_top)*self.get_K_top_RBF(self.K)
+
+        K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype,
+                                                                           device=self.device)
+
+        L = torch.cholesky(K0)
+
+        logdetK0 = 2. * torch.sum(torch.log(torch.diag(L)))
+        Lk = torch.triangular_solve(self.Y - self.mean_constant * torch.ones_like(self.Y,dtype=self.dtype,device=self.device), L, upper=False)[0]
+        ytKy = torch.mm(Lk.t(), Lk)
+
+        ml = -0.5 * logdetK0 - 0.5 * ytKy - 0.5 * math.log(2. * math.pi) * self.n
+
+        return -ml.div_(self.n)
 
     def obj(self):
 
@@ -139,18 +186,35 @@ class GP():
         return -ml.div_(self.n)
 
 
-    def predict(self, X_train, X_test):
+    def predict(self, X_train, X_test=None,RBF_top=False):
 
-        K = self.transform_softplus(self.variance) * self.K_eval_full(X_train)
+        if RBF_top:
+            K = self.K_eval_full(X_train)
+            K = self.transform_softplus(self.variance) * self.get_K_top_RBF(K)
+        else:
+            K = self.transform_softplus(self.variance) * self.K_eval_full(X_train)
 
         K0 = K + self.transform_softplus(self.noise_obs, 1e-4) * torch.eye(K.shape[0], dtype=self.dtype,device=self.device)
 
         L = torch.cholesky(K0)
 
         # Compute the mean at our test points
+        if RBF_top:
+            if X_test is None:
+                K_s = K
+                K_ss = K
+            else:
+                X_full = torch.cat((X_train,X_test))
+                K_full = self.K_eval_full(X_full,X_full)
+                K_ss = self.K_eval_full(X_test,X_test)
+                K_ss = self.transform_softplus(self.variance) * self.get_K_top_RBF(K_ss)
+                K_s = self.transform_softplus(self.variance) * self.get_K_top_RBF(K_full,X_train.shape[0])
 
-        K_s = self.transform_softplus(self.variance) * self.K_eval_full(X_train,X_test)
-        K_ss = self.transform_softplus(self.variance) * self.K_eval_full(X_test,X_test)
+        else:
+            if X_test is None:
+                X_test = X_train
+            K_s = self.transform_softplus(self.variance) * self.K_eval_full(X_train,X_test)
+            K_ss = self.transform_softplus(self.variance) * self.K_eval_full(X_test,X_test)
 
         Lk = torch.triangular_solve(K_s, L, upper=False)[0]
         Ly = torch.triangular_solve(self.Y - self.mean_constant * torch.ones_like(self.Y, dtype=self.dtype,device=self.device), L, upper=False)[0]
