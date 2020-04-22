@@ -30,12 +30,14 @@ class Circuit():
         omega = (self.spec_param['omega'][1] - self.spec_param['omega'][0]) * np.random.rand(self.N_bags) + self.spec_param['omega'][
             0] * np.ones(self.N_bags)
         C = (self.spec_param['C'][1] -self.spec_param['C'][0]) * np.random.rand(self.N_bags) + self.spec_param['C'][0] * np.ones(self.N_bags)
+        phi = (self.spec_param['phi'][1] - self.spec_param['phi'][0]) * np.random.rand(self.N_bags) + self.spec_param['phi'][0] * np.ones(self.N_bags)
 
         # generate one path per bag
         paths_ref = np.zeros((self.N_bags,self.L,2))
         for i in range(self.N_bags):
             paths_ref[i,:,0] = np.cos(omega[i]*self.t_span)
-            paths_ref[i, :, 1] = -C[i]*omega[i]*np.sin(omega[i] * self.t_span)
+            paths_ref[i, :, 1] = C[i]*omega[i]*np.cos(omega[i] * self.t_span + phi[i])
+        figure = plt.figure(figsize=(30,10))
         plt.plot(self.t_span,paths_ref[0,:,0])
         plt.plot(self.t_span,paths_ref[0, :,1])
         plt.title('checking the frequency')
@@ -48,11 +50,66 @@ class Circuit():
                 paths[i,j] = paths_ref[i,choice_obs,:]
 
         self.paths = paths
-        self.C = C[:, None]
+        self.C = C
+        self.phi = phi
+        self.P = (1/self.t_span[-1])*np.sum(paths_ref[:,:,0]*paths_ref[:,:,1],axis=1)
+
+    def generate_data_RLC(self):
+
+        paths = np.zeros((self.N_bags, self.N_items, self.nb_obs, 2))
+
+        omega = (self.spec_param['omega'][1] - self.spec_param['omega'][0]) * np.random.rand(self.N_bags) + \
+                self.spec_param['omega'][
+                    0] * np.ones(self.N_bags)
+        em = (self.spec_param['em'][1] - self.spec_param['em'][0]) * np.random.rand(self.N_bags) + \
+                self.spec_param['em'][
+                    0] * np.ones(self.N_bags)
+        R = (self.spec_param['R'][1] - self.spec_param['R'][0]) * np.random.rand(self.N_bags) + self.spec_param['R'][
+            0] * np.ones(self.N_bags)
+        L = (self.spec_param['L'][1] - self.spec_param['L'][0]) * np.random.rand(self.N_bags) + \
+              self.spec_param['L'][0] * np.ones(self.N_bags)
+
+        C = (self.spec_param['C'][1] - self.spec_param['C'][0]) * np.random.rand(self.N_bags) + \
+              self.spec_param['C'][0] * np.ones(self.N_bags)
+
+
+        X_L = omega*L
+        X_C = 1./(omega*C)
+        Z = np.sqrt(R**2+(X_L-X_C)**2)
+        I_m = em*(1./Z)
+        tan_phi = (X_L-X_C)*(1./R)
+
+        # generate one path per bag
+        paths_ref = np.zeros((self.N_bags, self.L, 2))
+        for i in range(self.N_bags):
+            paths_ref[i, :, 0] = em * np.sin(omega[i] * self.t_span)
+            paths_ref[i, :, 1] = I_m * np.sin(omega[i] * self.t_span - np.arctan(tan_phi))
+        figure = plt.figure(figsize=(30, 10))
+        plt.plot(self.t_span, paths_ref[0, :, 0])
+        plt.plot(self.t_span, paths_ref[0, :, 1])
+        plt.title('checking the frequency')
+        plt.show()
+
+        for i in range(self.N_bags):
+            for j in range(self.N_items):
+                choice_obs = np.random.choice(np.arange(self.L), size=self.nb_obs, replace=False)
+                choice_obs = np.sort(choice_obs)
+                paths[i, j] = paths_ref[i, choice_obs, :]
+
+        self.paths = paths
+        self.C = C
+        self.tan_phi = tan_phi
+        self.P = (1 / self.t_span[-1]) * np.sum(paths_ref[:, :, 0] * paths_ref[:, :, 1], axis=1)
 
     def get_C(self):
+        self.labels = self.C[:,None]
 
-        self.labels = self.C
+    def get_phi(self):
+        self.labels = self.phi[:,None]
+
+    def get_P(self):
+
+        self.labels = self.P[:,None]
 
     def compute_plot_naive_norms(self):
 
