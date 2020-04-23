@@ -52,7 +52,7 @@ def exp1(N_MC,subsample,N_bags=100, N_items=30, nb_periods=20,spec_param={'phi':
                                                                                                                 0, 0],
                                                                                                     device=torch.device(
                                                                                                         'cuda'),
-                                                                                                    plot=True)
+                                                                                                    plot=False)
 
             ''' GP SIG '''
 
@@ -61,7 +61,7 @@ def exp1(N_MC,subsample,N_bags=100, N_items=30, nb_periods=20,spec_param={'phi':
 
             K_precomputed = experiments.precompute_K(expected_sig)
             train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 = experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices,
-                                                            param_init=[0, 0, 0], RBF=True, plot=True)
+                                                            param_init=[0, 0, 0], RBF=True, plot=False)
 
             ''' STORE THE RESULTS '''
             df_train_RBF_rmse.iloc[i,j] = train_RBF_rmse
