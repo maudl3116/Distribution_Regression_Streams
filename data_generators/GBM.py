@@ -14,14 +14,14 @@ class gbm():
     # equation: x^2/a^2 + y^2/b^2 = 1
     # parametrix equation: (x,y) = (acos(t),bsin(t))  t in [0,2pi]
 
-    def __init__(self, N_bags=100, N_items=15, t_span=np.linspace(0, 10, 100), spec_param={'a': [1., 2.], 'b': [1., 2.]}):
+    def __init__(self, N_bags=100, N_items=15, t_span=np.linspace(0, 10, 500), spec_param={'a': [1., 2.], 'b': [1., 2.]},nb_sub=200):
         self.N_bags = N_bags
         self.N_items = N_items
 
         self.t_span = t_span
         self.L = len(t_span)
         self.spec_param = spec_param
-
+        self.nb_obs = nb_obs
         self.paths = None
         self.labels = None
 
@@ -42,7 +42,16 @@ class gbm():
 
         paths = torch.tensor(paths).transpose(1, 0).transpose(2, 1).numpy()
 
-        self.paths = paths
+        paths_sub = np.zeros((self.N_bags,self.N_items,self.nb_obs,1))
+        for i in range(self.N_bags):
+            for j in range(self.N_items):
+                choice_obs = np.random.choice(np.arange(self.L), size=self.nb_obs, replace=False)
+                choice_obs = np.sort(choice_obs)
+                paths_sub[i, j] = paths[i, j, choice_obs, :]
+
+        self.paths = paths_sub
+        self.paths_complete = paths
+
 
         self.a = a[:, None]
         self.b = b[:, None]
@@ -127,7 +136,7 @@ class gbm():
         for i in range(len(samples)):
 
             for item in range(N_items):
-                ax[i].plot(self.t_span, self.paths[order][samples[i]][item, :, 0],
+                ax[i].plot(self.t_span, self.paths_complete[order][samples[i]][item, :, 0],
                            color=colors[i])
                 ax[i].set_title('label: %.2f' % self.labels[order][samples[i]])
             ax[i].axhline(0, ls='--', color='black')
