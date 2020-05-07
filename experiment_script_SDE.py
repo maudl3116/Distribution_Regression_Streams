@@ -213,7 +213,7 @@ def exp2(N_MC,N_bags=100, N_items=30, tspan=np.linspace(0,1,200),spec_param = {'
 
 
 
-def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=15, t_span=np.linspace(0,1,300),spec_param={'alpha':[2,9],'m':[0.000025,0.000025],'nu':[1.,1.],'mu':[0.0003,0.0003],'Y0_1':[600,600],'Y0_2':[0.001,0.001]},device=torch.device('cuda')):
+def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=30, t_span=np.linspace(0,1,300),spec_param={'alpha':[2,9],'m':[0.000025,0.000025],'nu':[1.,1.],'mu':[0.0003,0.0003],'Y0_1':[600,600],'Y0_2':[0.001,0.001]},device=torch.device('cuda')):
 
     # in this experiment, we evaluate the robustness of two regression models to the position noise of the ellipsis.
 
@@ -260,8 +260,8 @@ def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=15, t_span=np.linspace(0,1,300)
             K_precomputed = experiments.precompute_K(features)
 
             # Train and Predict
-            train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 =experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices, RBF=True,
-                                               plot=False,device=device)
+            train_Sig_rmse, train_Sig_r2, test_Sig_rmse, test_Sig_r2 =experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices, param_init=[10,0,0],RBF=True,
+                                               plot=False,device=torch.device('cpu'))
 
             ''' GP PATHWISE SIG '''
             sig_level1 = 4
@@ -277,7 +277,7 @@ def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=15, t_span=np.linspace(0,1,300)
 
             # Train and Predict
             train_pathwise_Sig_rmse, train_pathwise_Sig_r2, test_pathwise_Sig_rmse, test_pathwise_Sig_r2 = experiments.experiment_precomputed(K_precomputed, y_scaled, train_indices, test_indices,
-                                                            plot=False)
+                                                            plot=False,device=torch.device('cpu'))
 
 
             ''' GP NAIVE '''
