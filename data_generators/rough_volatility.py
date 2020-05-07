@@ -90,7 +90,7 @@ class Rough_Volatility():
             for j in range(self.N_items):
                 choice_obs = np.random.choice(np.arange(self.L), size=N_obs, replace=False)
                 choice_obs = np.sort(choice_obs)
-                paths_sub[i,j] = self.paths[i,choice_obs,:]
+                paths_sub[i,j] = self.paths[i,j,choice_obs,:]
 
         self.paths_sub = paths_sub
 

@@ -247,17 +247,16 @@ def exp_rough_vol(N_MC,N_obs,hurst=0.4,N_bags=100, N_items=15, spec_param={'alph
             example.subsample(param)
             ''' PREPARE DATA FOR REGRESSION '''
             data_scaled, y_scaled, train_indices, test_indices = utils.split_standardize(example.labels, example.paths_sub[:,:,:,1][:,:,:,None],
-                                                                                     standardized=True,
+                                                                                     standardized=False,
                                                                                      method='stratify')
 
-            X_aug = utils.add_dimension(data_scaled, add_time=False, lead_lag=0)
+            X_aug = utils.add_dimension(data_scaled, add_time=True, lead_lag=None)
 
             ''' GP SIG '''
-            sig_level = 4
+            sig_level = 3
 
             # Compute the expected signature
-            expected_sig = signature_features.scaled_expected_sig([e.copy() for e in X_aug], sig_level, M=500,
-                                                                  a=1, ilya_rescale=True, return_norms=False)
+            expected_sig = signature_features.scaled_expected_sig([e.copy() for e in X_aug], sig_level)
             features = expected_sig
             K_precomputed = experiments.precompute_K(features)
 
@@ -266,13 +265,12 @@ def exp_rough_vol(N_MC,N_obs,hurst=0.4,N_bags=100, N_items=15, spec_param={'alph
                                                plot=False,device=torch.device('cpu'))
 
             ''' GP PATHWISE SIG '''
-            sig_level1 = 4
+            sig_level1 = 3
             sig_level2 = 2
 
             # pathwise expected sig
             expected_pathwise_sig = signature_features.scaled_pathwise_expected_iisignature([e.copy() for e in X_aug],
-                                                                                            sig_level1,M=500,
-                                                                  a=1, ilya_rescale=True, return_norms=False)
+                                                                                            sig_level1)
 
 
             signatures = iisignature.sig(expected_pathwise_sig, sig_level2)
