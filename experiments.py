@@ -19,6 +19,15 @@ def precompute_K(X):
             K_precomputed[j][i] = K_precomputed[i][j]
     return K_precomputed
 
+def augment_K_precomputed(K_precomputed,X_train,x_test):
+    K_aug = np.zeros((len(X_train)+1,len(X_train)+1))
+    K_aug[:len(X_train),:len(X_train)]=K_precomputed
+    for i in range(len(X_train)):
+        K_aug[-1,i] = 1.+ np.dot(X_train[i],x_test)
+        K_aug[i,-1] = K_aug[-1,i]
+    K_aug[-1][-1] = 1.+np.dot(x_test,x_test)
+    return K_aug
+
 
 def loss_naive(x, y, train_index, test_index):
 
@@ -163,7 +172,7 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, param_init
     #fig = plt.figure(figsize=(25, 7))
     #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train,y_test[:, 0], mu_test[:, 0], stdv_test)
     #plt.show()
-
+    predictions = {'mu_train':mu_train, 'stdv_train':stdv_train, 'mu_test':mu_test, 'stdv_test':stdv_test}
     return RMSE_train, R2_train, RMSE_test, R2_test
 
 

@@ -312,8 +312,7 @@ class GP():
         # Comoute the standard devaitoin so we can plot it
 
         s2 = torch.diag(K_ss) - torch.sum(Lk ** 2, axis=0)
-        stdv_test = 2*torch.sqrt(s2 + self.transform_softplus(self.noise_obs, 1e-4) )
-
+        stdv_test = 2*torch.sqrt(s2  + self.transform_softplus(self.noise_obs, 1e-4))
 
 
         return mu_test.cpu().detach().numpy(), stdv_test.cpu().detach().numpy()
