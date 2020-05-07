@@ -237,10 +237,10 @@ def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=15, t_span=np.linspace(0,1,300)
         for j,param in enumerate(params):
 
             ''' GENERATE DATA '''
-            example = SDE.sde(N_bags=N_bags, N_items=N_items, t_span=tspan, spec_param=spec_param)
+            example = rough_volatility.Rough_Volatility(N_bags=N_bags,N_items=N_items,t_span=t_span, hurst=param,spec_param=spec_param)
 
             example.generate_data()
-            example.get_param()
+            example.get_alpha()
 
             ''' PREPARE DATA FOR REGRESSION '''
             data_scaled, y_scaled, train_indices, test_indices = utils.split_standardize(example.labels, example.paths[:,:,:,1][:,:,:,None],
