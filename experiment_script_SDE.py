@@ -4,6 +4,7 @@ import utils
 import experiments
 import signature_features
 from data_generators import SDE
+from data_generators import rough_volatility
 import pickle
 import pandas as pd
 import torch
