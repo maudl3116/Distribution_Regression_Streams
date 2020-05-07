@@ -84,14 +84,15 @@ class Rough_Volatility():
         self.m = m
         self.nu = nu
 
-    def subsample(self):
+    def subsample(self,N_obs):
+        paths_sub = np.zeros((self.N_bags,self.N_items,N_obs,2))
         for i in range(self.N_bags):
             for j in range(self.N_items):
-                choice_obs = np.random.choice(np.arange(self.L), size=self.nb_obs, replace=False)
+                choice_obs = np.random.choice(np.arange(self.L), size=N_obs, replace=False)
                 choice_obs = np.sort(choice_obs)
-                paths[i,j] = paths_ref[i,choice_obs,:]
+                paths_sub[i,j] = self.paths[i,choice_obs,:]
 
-        pass
+        self.paths_sub = paths_sub
 
     def get_alpha(self):
         self.labels = self.alpha[:,None]

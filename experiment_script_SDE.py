@@ -213,7 +213,7 @@ def exp2(N_MC,N_bags=100, N_items=30, tspan=np.linspace(0,1,200),spec_param = {'
 
 
 
-def exp_rough_vol(N_MC,N_obs,hurst=0.4,N_bags=100, N_items=30, spec_param={'alpha':[2,9],'m':[0.000025,0.000025],'nu':[1.,1.],'mu':[0.0003,0.0003],'Y0_1':[600,600],'Y0_2':[0.001,0.001]},device=torch.device('cuda')):
+def exp_rough_vol(N_MC,N_obs,hurst=0.4,N_bags=100, N_items=15, spec_param={'alpha':[2,9],'m':[0.000025,0.000025],'nu':[1.,1.],'mu':[0.0003,0.0003],'Y0_1':[600,600],'Y0_2':[0.001,0.001]},device=torch.device('cuda')):
 
     # in this experiment, we evaluate the robustness of two regression models to the position noise of the ellipsis.
 
@@ -238,14 +238,15 @@ def exp_rough_vol(N_MC,N_obs,hurst=0.4,N_bags=100, N_items=30, spec_param={'alph
         for j,param in enumerate(params):
 
             ''' GENERATE DATA '''
-            t_span = np.linspace(0, 1, param)
+            t_span = np.linspace(0, 1, 1000)
             example = rough_volatility.Rough_Volatility(N_bags=N_bags,N_items=N_items,t_span=t_span, hurst=hurst,spec_param=spec_param)
 
             example.generate_data()
-            example.get_nu()
+            example.get_alpha()
 
+            example.subsample(param)
             ''' PREPARE DATA FOR REGRESSION '''
-            data_scaled, y_scaled, train_indices, test_indices = utils.split_standardize(example.labels, example.paths[:,:,:,1][:,:,:,None],
+            data_scaled, y_scaled, train_indices, test_indices = utils.split_standardize(example.labels, example.paths_sub[:,:,:,1][:,:,:,None],
                                                                                      standardized=True,
                                                                                      method='stratify')
 
