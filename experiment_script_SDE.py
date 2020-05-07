@@ -272,7 +272,7 @@ def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=15, t_span=np.linspace(0,1,300)
                                                                                             sig_level1)
 
 
-            signatures = iisignature.sig(features, sig_level2)
+            signatures = iisignature.sig(expected_pathwise_sig, sig_level2)
             K_precomputed = experiments.precompute_K(signatures)
 
             # Train and Predict
