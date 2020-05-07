@@ -242,7 +242,7 @@ def exp_rough_vol(N_MC,N_obs,hurst=0.4,N_bags=100, N_items=30, spec_param={'alph
             example = rough_volatility.Rough_Volatility(N_bags=N_bags,N_items=N_items,t_span=t_span, hurst=hurst,spec_param=spec_param)
 
             example.generate_data()
-            example.get_alpha()
+            example.get_nu()
 
             ''' PREPARE DATA FOR REGRESSION '''
             data_scaled, y_scaled, train_indices, test_indices = utils.split_standardize(example.labels, example.paths[:,:,:,1][:,:,:,None],
