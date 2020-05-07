@@ -269,7 +269,8 @@ def exp_rough_vol(N_MC,hurst,N_bags=100, N_items=30, t_span=np.linspace(0,1,300)
 
             # pathwise expected sig
             expected_pathwise_sig = signature_features.scaled_pathwise_expected_iisignature([e.copy() for e in X_aug],
-                                                                                            sig_level1)
+                                                                                            sig_level1,M=500,
+                                                                  a=1, ilya_rescale=True, return_norms=False)
 
 
             signatures = iisignature.sig(expected_pathwise_sig, sig_level2)
