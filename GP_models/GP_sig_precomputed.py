@@ -59,10 +59,10 @@ def matprint(mat, fmt="g"):
 
 def train(model,training_iter,RBF=False,plot=False,ax=None):
 
-    optimizer = torch.optim.Adam(model.params, lr=0.1)
+    optimizer = torch.optim.Adam(model.params, lr=0.01)
     losses = []
     already_plot = False
-    for i in np.arange(training_iter):
+    for i in tqdm(np.arange(training_iter)):
         # Zero gradients from previous iteration
         # Output from model
         # Calc loss and backprop gradients
