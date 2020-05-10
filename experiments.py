@@ -60,7 +60,54 @@ def loss_sig(K_precomputed, y, train_index, test_index):
 
     GP_sig.plot_marginal_log_lik(model)
 
+def naive_experiment_arbitrary(x, y, train_index,ARD=False,RBF_top=False,param_init=[0,0,0],plot=False,device=torch.device("cuda")):
 
+    if plot:
+        sns.set_context("notebook", font_scale=1.5, rc={"lines.linewidth": 1.5})
+        fig, axs = plt.subplots(1, 3, figsize=(35, 7))
+        axs = axs.ravel()
+
+    y_train, y_test = y[:train_index], y[train_index:]
+    x_train, x_test = x[:train_index], x[train_index:]
+
+    # x_train is of shape N_bags x N_items x time*D
+    # changed into N_bags x timexD x N_items
+
+    x_train = [torch.tensor(e, dtype=torch.float64, device=device).transpose(0, 1) for e in x_train]
+    x_test = [torch.tensor(e, dtype=torch.float64, device=device).transpose(0, 1) for e in x_test]
+
+
+    model = GP_naive.GP(x_train, torch.tensor(y_train, dtype=torch.float64), param_init[0], param_init[1],param_init[2], param_init[3],
+                            ['lengthscale', 'variance', 'noise'],ARD=ARD,device=device)
+    if plot:
+        GP_naive.train(model, 2000, RBF_top=RBF_top, plot=plot,ax=axs[0])
+    else:
+        GP_naive.train(model, 2000,RBF_top=RBF_top)
+
+    # for arbitrary
+
+    mu_test, stdv_test = model.predict(x_train, x_test,RBF_top=RBF_top)
+    mu_train, stdv_train = model.predict(x_train,x_train,RBF_top=RBF_top)
+    R2_train = compute_r2(y_train[:, 0], mu_train[:, 0])
+    R2_test = compute_r2(y_test[:, 0], mu_test[:, 0])
+    RMSE_train = compute_rmse(y_train[:, 0], mu_train[:, 0])
+    RMSE_test = compute_rmse(y_test[:, 0], mu_test[:, 0])
+
+    #fig, axs = plt.subplots(1, 1, figsize=(15, 7))
+    # ax = plt.figure(figsize=(25, 7))
+
+    # regression_models.plot_fit(axs[0], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
+    #regression_models.plot_fit(axs, y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
+    if plot:
+        plot_fit(axs[1], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
+        plot_fit(axs[2], y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
+        plt.show()
+    #fig = plt.figure(figsize=(25, 7))
+    #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train, y_test[:, 0], mu_test[:, 0],
+    #                                    stdv_test)
+    #plt.show()
+
+    return RMSE_train, R2_train, RMSE_test, R2_test
 
 def naive_experiment(x, y, train_index, test_index,ARD=False,RBF_top=False,param_init=[0,0,0],plot=False,device=torch.device("cuda")):
 
@@ -168,12 +215,13 @@ def experiment_precomputed(K_precomputed, y, train_index, test_index, param_init
     if plot:
         plot_fit(axs[1], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
         plot_fit(axs[2], y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
+        order = np.argsort(y_test[:, 0])
         plt.show()
     #fig = plt.figure(figsize=(25, 7))
     #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train,y_test[:, 0], mu_test[:, 0], stdv_test)
     #plt.show()
     predictions = {'mu_train':mu_train, 'stdv_train':stdv_train, 'mu_test':mu_test, 'stdv_test':stdv_test}
-    return RMSE_train, R2_train, RMSE_test, R2_test
+    return RMSE_train, R2_train, RMSE_test, R2_test,order
 
 
 def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,0,0],RBF=False,plot=False,device=torch.device("cpu")):
@@ -193,7 +241,7 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
     else:
         model = GP_sig_ARD.GP(x_train_torch, torch.tensor(y_train, dtype=torch.float64,device=device), d,level_sig, param_init[0], param_init[1], param_init[2], param_list = ['lengthscale', 'noise'], device=device)
 
-    GP_sig_ARD.train(model, 2000, RBF=RBF, plot=plot, ax=axs[0])
+    GP_sig_ARD.train(model, 3000, RBF=RBF, plot=plot, ax=axs[0])
     print(torch.max(model.K))
     print(torch.min(model.K))
 
@@ -213,6 +261,7 @@ def experiment_ARD(data, y, d,level_sig, train_index, test_index, param_init=[0,
     if plot:
         plot_fit(axs[1], y_train[:, 0], mu_train[:, 0], std=stdv_train, sklearn=True)
         plot_fit(axs[2], y_test[:, 0], mu_test[:, 0], std=stdv_test, sklearn=True)
+
         plt.show()
     #fig = plt.figure(figsize=(25, 7))
     #regression_models.plot_extrapolation(y_train[:, 0], mu_train[:, 0], stdv_train,y_test[:, 0], mu_test[:, 0], stdv_test)
@@ -255,17 +304,24 @@ def plot_fit(ax, y_, pred, low=None, up=None, std=None, sklearn=False):
 
     R_squared = 1. - num / denum
 
-    ax.set_ylabel('predicted target', fontsize=16)
-    ax.set_xlabel('true target', fontsize=16)
-    plt.text(right, bottom, 'RMSE=%.2f' % RMSE,
-             horizontalalignment='right',
-             verticalalignment='bottom',
-             transform=ax.transAxes)#, fontsize=16)
-    plt.text(right, bottom - 0.1, 'R-squared=%.2f' % R_squared,
-             horizontalalignment='right',
-             verticalalignment='bottom',
-             transform=ax.transAxes)#, fontsize=16)
 
+    MAPE = np.mean(np.abs(y_[order] - pred[order])/y_[order])
+
+    ax.set_ylabel('predicted target', fontsize=18)
+    ax.set_xlabel('true target', fontsize=18)
+    plt.text(right, bottom, 'RMSE=%.3f' % RMSE,
+             horizontalalignment='right',
+             verticalalignment='bottom',
+             transform=ax.transAxes, fontsize=18)
+    plt.text(right, bottom - 0.1, 'R-squared=%.3f' % R_squared,
+             horizontalalignment='right',
+             verticalalignment='bottom',
+             transform=ax.transAxes, fontsize=18)
+
+    plt.text(right, bottom - 0.2, 'MAPE=%.3f' % MAPE,
+             horizontalalignment='right',
+             verticalalignment='bottom',
+             transform=ax.transAxes, fontsize=18)
 
 def compute_rmse(y_, pred):
     order = np.argsort(y_)
@@ -279,3 +335,6 @@ def compute_r2(y_, pred):
     denum = np.sum((y_[order] - np.mean(y_[order])) ** 2)
 
     return 1. - num / denum
+
+
+

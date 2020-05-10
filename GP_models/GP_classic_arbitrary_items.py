@@ -14,44 +14,40 @@ import math
 from matplotlib.pyplot import imshow, show, colorbar
 
 
-def train(model, training_iter, plot=False,path=None):
+def train(model, training_iter,RBF_top=False, plot=False,ax=None):
 
     optimizer = torch.optim.Adam(model.params, lr=0.1)
     losses = []
     already_plot = False
 
-    for i in range(training_iter):
-        loss = model.obj()
+    for i in np.arange(training_iter):
+        if RBF_top:
+            loss = model.obj_RBF()
+        else:
+            loss = model.obj()
         optimizer.zero_grad()
         loss.backward()
         losses.append(loss)
 
-
         if i > 100 and np.abs(losses[i].cpu().detach().numpy() - losses[i - 1].cpu().detach().numpy()) < 1e-5:
             if plot:
                 already_plot = True
-                fig = plt.figure()
-                plt.plot(losses)
-                plt.xlabel('epoch')
-                plt.ylabel('negative marginal log likelihood')
-                plt.savefig(path+'/loss.pdf')
-                plt.close(fig)
+                ax.plot(losses)
+                ax.set_xlabel('epoch')
+                ax.set_ylabel('negative marginal log likelihood')
 
             break
         optimizer.step()
     if plot and not already_plot:
-        fig = plt.figure()
-        plt.plot([e[0].cpu().detach().numpy() for e in losses],color='blue')
-        plt.xlabel('epoch')
-        plt.ylabel('negative marginal log likelihood')
-        plt.savefig(path + '/loss.pdf')
-        plt.close(fig)
+        ax.plot([e[0].cpu().detach().numpy() for e in losses],color='blue')
+        ax.set_xlabel('epoch')
+        ax.set_ylabel('negative marginal log likelihood')
 
 
 
 class GP():
 
-    def __init__(self, X, Y, l_init, var_init, noise_init, param_list=['lengthscale', 'variance', 'noise'],ARD=False,dtype=torch.float64,
+    def __init__(self, X, Y, l_init, var_init, noise_init, l_init_top=None, param_list=['lengthscale', 'variance', 'noise'],ARD=False,dtype=torch.float64,
                  device=torch.device("cpu")):
 
         self.device = device
@@ -241,7 +237,7 @@ class GP():
 
         return -ml.div_(self.n)
 
-    def predict(self, X_train, X_test):
+    def predict(self, X_train, X_test,RBF_top=False):
         if RBF_top:
             K = self.K_eval_full(X_train,X_train)
             K = self.transform_softplus(self.variance) * self.get_K_top_RBF(K)
