@@ -7,7 +7,7 @@ import torch.utils.data as data_utils
 import torch.optim as optim
 from torch.autograd import Variable
 from dataloader import PadSequence, NdviDataset
-from model import MIL_LSTM
+from model import MIL_LSTM, MIL_RNN
 import matplotlib.pyplot as plt
 import torch.nn as nn
 
@@ -24,6 +24,7 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
 parser.add_argument('--model', type=str, default='LSTM', help='Choose type of recurrent neural network')
+parser.add_argument('--bags_batch', type=int, default=1, help='Number of bags in one batch')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -35,10 +36,10 @@ if args.cuda:
 
 print('Load Train and Test Set')
 loader_kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-root_dir = '/Users/maudlemercier/Desktop/Distribution_Regression_Streams/'
+root_dir = '../'
 
 train_loader = data_utils.DataLoader(NdviDataset(data_file=root_dir+'input_list_RBF.obj',label_file=root_dir+'output_RBF.obj',train=True,nb_train=200),
-                                     batch_size=1,
+                                     batch_size=args.bags_batch,
                                      shuffle=True,
                                      collate_fn=PadSequence(),
                                      **loader_kwargs)
@@ -52,14 +53,26 @@ test_loader = data_utils.DataLoader(NdviDataset(data_file=root_dir+'input_list_R
 print('Init Model')
 if args.model=='LSTM':
     model = MIL_LSTM(input_dim=2, hidden_dim=10, output_dim=1)
+elif args.model=='RNN':
+    model = MIL_RNN(input_dim=2, hidden_dim=10, output_dim=1)
 
 if args.cuda:
     model.cuda()
 
 optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=args.reg)
 
-def Loss(yhat,y):
-    return torch.sqrt((y-torch.mean(yhat))**2)
+def Loss(yhat,y,bag_id):
+    loss = 0.
+    preds = []
+    labels = []
+    for id in bag_id:
+        n = torch.sum(id)
+        subset = torch.dot(id[:,0],yhat[:,0])/n
+        label_subset = (torch.dot(id[:,0],y)/n).item()
+        labels.append(label_subset)
+        loss+= (label_subset-subset)**2
+        preds.append(subset.detach().cpu().mean())
+    return loss/args.bags_batch, preds, labels
 
 
 
@@ -67,33 +80,35 @@ def train(epoch,ax=None):
     model.train()
     train_loss = 0.
     c = 0
-    labels = []
+    labels_ = []
     predictions = []
 
-    for batch_idx, (data,len, bag_label) in enumerate(train_loader):
+    for batch_idx, (data, len, bag_proj, bag_label) in enumerate(train_loader):
         if args.cuda:
             data, bag_label = data.cuda(), bag_label.cuda()
         data, bag_label = Variable(data), Variable(bag_label)
-        labels.append(bag_label.detach().cpu().item())
+
         # reset gradients
         optimizer.zero_grad()
         # calculate loss and metrics
-        y_pred = model((data,len, bag_label))
-        predictions.append(y_pred.mean().detach().cpu().item())
-        loss = Loss(y_pred,bag_label)
-        train_loss += loss.data
+        y_pred = model((data,len))
+        loss,preds,labels = Loss(y_pred,bag_label,bag_proj)
+
+        for i,pred in enumerate(preds):
+            predictions.append(pred.item())
+            labels_.append(labels[i])
+        train_loss += args.bags_batch*loss.data
         # backward pass
         loss.backward()
         # step
         optimizer.step()
         c+=1
-
     # calculate loss and error for epoch
     train_loss /= c
-
-    print('Epoch: {}, Loss: {:.4f}, Number batches: {:.4f}'.format(epoch, train_loss.cpu().numpy(),c))
+    if epoch%100==0:
+        print('Epoch: {}, Loss: {:.4f}, Number batches: {:.4f}'.format(epoch, train_loss.cpu().numpy(),c))
     if not ax is None:
-        plot_fit(ax, np.array(labels),np.array(predictions))
+        plot_fit(ax, np.array(labels_),np.array(predictions))
 
 
 def test(ax):
@@ -102,22 +117,18 @@ def test(ax):
     c = 0
     labels = []
     predictions = []
-    for batch_idx, (data,len, bag_label) in enumerate(test_loader):
+    for batch_idx, (data,len, bag_proj,bag_label) in enumerate(test_loader):
+
         if args.cuda:
             data, bag_label = data.cuda(), bag_label.cuda()
         data, bag_label = Variable(data), Variable(bag_label)
-        labels.append(bag_label.detach().cpu().item())
-        # reset gradients
-        optimizer.zero_grad()
+
         # calculate loss and metrics
-        y_pred = model((data,len, bag_label))
+        y_pred = model((data,len))
         predictions.append(y_pred.mean().detach().cpu().item())
-        loss = Loss(y_pred,bag_label)
+        loss,preds_,label = Loss(y_pred,bag_label,bag_proj)
+        labels.append(label[0])
         test_loss += loss.data
-        # backward pass
-        loss.backward()
-        # step
-        optimizer.step()
         c+=1
 
     # calculate loss and error for epoch

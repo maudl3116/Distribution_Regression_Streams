@@ -4,24 +4,31 @@ from torch.utils.data import Dataset, DataLoader
 import pickle
 
 class PadSequence:
-    def __call__(self, batch):
+    def __call__(self, batches):
         # Let's assume that each element in "batch" is a tuple (data, label).
         # Sort the batch in the descending order
-        #print(batch[0][1])  this is the label of the batch
-        batch = batch[0] #added by me
-        bag = batch[0]
-        label = batch[1]
-
-        sorted_batch = sorted(bag, key=lambda x: x.shape[0], reverse=True)
+        batch = []
+        for b in batches:
+            batch = batch+b
+        sorted_batch = sorted(batch, key=lambda item: item[0].shape[0], reverse=True)
         # Get each sequence and pad it
-        sequences = [torch.tensor(e) for e in sorted_batch]
+        sequences = [torch.tensor(item[0]) for item in sorted_batch]
         sequences_padded = torch.nn.utils.rnn.pad_sequence(sequences, batch_first=True)
         # Also need to store the length of each sequence
         # This is later needed in order to unpad the sequences
-        lengths = torch.LongTensor([len(x) for x in sequences])
+        lengths = torch.LongTensor([len(item[0]) for item in sequences])
+        labels = torch.tensor(list(map(lambda item: item[1], sorted_batch)),dtype=torch.float32)
+        bag_id = list(map(lambda item: item[2], sorted_batch))
 
+        unique_ids = np.unique(bag_id)
+        proj_vec = []
+        for id in unique_ids:
+            l = np.zeros(len(bag_id))
+            l[bag_id == id] = 1.
+            proj_vec.append(np.array(l)[:,None])
+        proj_vec = torch.tensor(proj_vec,dtype=torch.float32)
         # Don't forget to grab the labels of the *sorted* batch
-        return sequences_padded, lengths, torch.tensor(label)
+        return sequences_padded, lengths, proj_vec, labels
 
 class NdviDataset(Dataset):
     """Face Landmarks dataset."""
@@ -53,5 +60,5 @@ class NdviDataset(Dataset):
         else:
             bag = self.test_bags_list[index]
             label = self.test_labels_list[index]
-
-        return bag, label
+        tuples = [[item,label,index] for item in bag]
+        return tuples
