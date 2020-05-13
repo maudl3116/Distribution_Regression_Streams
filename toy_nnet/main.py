@@ -102,8 +102,8 @@ def train(epoch,ax=None):
     # calculate loss for epoch
     train_loss /= nb_bags
 
-    if epoch%100==0:
-        print('Epoch: {}, Loss: {:.4f}'.format(epoch, train_loss.cpu().numpy()))
+    if True:
+        print('Epoch: {}, Loss: {:.4f}'.format(epoch, train_loss.item()))
 
     if not ax is None:
         plot_fit(ax, np.array(labels_plot),np.array(preds_plot))
@@ -124,10 +124,10 @@ def test(ax):
         data, bag_label = Variable(data), Variable(bag_label)
 
         # calculate loss and metrics
-        y_pred = model((data,len))
+        y_pred = model(data)
         predictions.append(y_pred.mean().item())
-        loss,preds_,label = Loss(y_pred,bag_label)
-        labels.append(label[0])
+        loss = Loss(y_pred,bag_label)
+        labels.append(bag_label)
         test_loss += loss.data
 
         c+=1
@@ -135,7 +135,7 @@ def test(ax):
     # calculate loss and error for epoch
     test_loss /= c
 
-    print('Loss: {:.4f}'.format(test_loss.cpu().numpy()))
+    print('Loss: {:.4f}'.format(test_loss.item()))
     plot_fit(ax, np.array(labels), np.array(predictions))
 
 
