@@ -88,8 +88,8 @@ def train(epoch,ax=None):
         y_pred = model(data)
         loss = Loss(y_pred,bag_label)
 
-        preds_plot.append(y_pred.mean().item())
-        labels_plot.append(bag_label)
+        preds_plot.append(y_pred.mean().item().detach().cpu())
+        labels_plot.append(bag_label.detach().cpu())
 
         train_loss += loss.data
 
@@ -125,9 +125,9 @@ def test(ax):
 
         # calculate loss and metrics
         y_pred = model(data)
-        predictions.append(y_pred.mean().item())
+        predictions.append(y_pred.mean().item().detach().cpu())
         loss = Loss(y_pred,bag_label)
-        labels.append(bag_label)
+        labels.append(bag_label.detach().cpu())
         test_loss += loss.data
 
         c+=1
