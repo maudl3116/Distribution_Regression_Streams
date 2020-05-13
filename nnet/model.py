@@ -56,7 +56,7 @@ class MIL_LSTM(nn.Module):
 class MIL_RNN(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim,
-                 num_layers=2):
+                 num_layers=1):
         super(MIL_RNN, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim

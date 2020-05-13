@@ -59,56 +59,77 @@ elif args.model=='RNN':
 if args.cuda:
     model.cuda()
 
-optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=args.reg)
+#optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=args.reg)
 
-def Loss(yhat,y,bag_id):
+optimizer = torch.optim.Adadelta(model.parameters())
+
+
+def Loss(y_pred,y_true,bag_proj):
+
     loss = 0.
-    preds = []
-    labels = []
-    for id in bag_id:
-        n = torch.sum(id)
-        subset = torch.dot(id[:,0],yhat[:,0])/n
-        label_subset = (torch.dot(id[:,0],y)/n).item()
-        labels.append(label_subset)
-        loss+= (label_subset-subset)**2
-        preds.append(subset.detach().cpu().mean())
-    return loss/args.bags_batch, preds, labels
+    preds_bags = []
+    labels_bags = []
+
+    for bag_id in bag_proj:
+
+        # number of items in bag
+        n = torch.sum(bag_id)
+
+        # mean of predictions for the bag bag_id
+        subset = torch.dot(bag_id[:,0],y_pred[:,0])/n
+        preds_bags.append(subset.detach().cpu().mean())
+
+        # label of the bag (obtained by taking the mean of identical labels)
+        label_bag = (torch.dot(bag_id[:,0],y_true)/n).item()
+        labels_bags.append(label_bag)
+
+        # add to the loss the loss of the bag
+        loss+= (label_bag-subset)**2
+
+    return loss/args.bags_batch, preds_bags, labels_bags
 
 
 
 def train(epoch,ax=None):
+
     model.train()
     train_loss = 0.
-    c = 0
-    labels_ = []
-    predictions = []
+    nb_bags = 0
+    labels_plot = []
+    preds_plot = []
 
     for batch_idx, (data, len, bag_proj, bag_label) in enumerate(train_loader):
         if args.cuda:
-            data, bag_label = data.cuda(), bag_label.cuda()
-        data, bag_label = Variable(data), Variable(bag_label)
+            data, bag_label,bag_proj = data.cuda(), bag_label.cuda(),bag_proj.cuda()
+        data, bag_label,bag_proj = Variable(data), Variable(bag_label),Variable(bag_proj)
 
         # reset gradients
         optimizer.zero_grad()
-        # calculate loss and metrics
-        y_pred = model((data,len))
-        loss,preds,labels = Loss(y_pred,bag_label,bag_proj)
 
-        for i,pred in enumerate(preds):
-            predictions.append(pred.item())
-            labels_.append(labels[i])
+        # calculate loss
+        y_pred = model((data,len))
+        loss,preds_bags,labels_bags = Loss(y_pred,bag_label,bag_proj)
+
+        for i,pred in enumerate(preds_bags):
+            preds_plot.append(pred.detach().cpu().numpy())
+            labels_plot.append(labels_bags[i])
+
         train_loss += args.bags_batch*loss.data
+
         # backward pass
         loss.backward()
-        # step
         optimizer.step()
-        c+=1
-    # calculate loss and error for epoch
-    train_loss /= c
+
+        nb_bags+=args.bags_batch
+
+    # calculate loss for epoch
+    train_loss /= nb_bags
+
     if epoch%100==0:
-        print('Epoch: {}, Loss: {:.4f}, Number batches: {:.4f}'.format(epoch, train_loss.cpu().numpy(),c))
+        print('Epoch: {}, Loss: {:.4f}'.format(epoch, train_loss.cpu().numpy()))
+
     if not ax is None:
-        plot_fit(ax, np.array(labels_),np.array(predictions))
+        plot_fit(ax, np.array(labels_plot),np.array(preds_plot))
 
 
 def test(ax):
@@ -117,11 +138,12 @@ def test(ax):
     c = 0
     labels = []
     predictions = []
+
     for batch_idx, (data,len, bag_proj,bag_label) in enumerate(test_loader):
 
         if args.cuda:
-            data, bag_label = data.cuda(), bag_label.cuda()
-        data, bag_label = Variable(data), Variable(bag_label)
+            data, bag_label,bag_proj = data.cuda(), bag_label.cuda(),bag_proj.cuda()
+        data, bag_label,bag_proj = Variable(data), Variable(bag_label),Variable(bag_proj)
 
         # calculate loss and metrics
         y_pred = model((data,len))
@@ -129,12 +151,13 @@ def test(ax):
         loss,preds_,label = Loss(y_pred,bag_label,bag_proj)
         labels.append(label[0])
         test_loss += loss.data
+
         c+=1
 
     # calculate loss and error for epoch
     test_loss /= c
 
-    print('Loss: {:.4f}, Number batches: {:.4f}'.format(test_loss.cpu().numpy(),c))
+    print('Loss: {:.4f}'.format(test_loss.cpu().numpy()))
     plot_fit(ax, np.array(labels), np.array(predictions))
 
 
@@ -186,4 +209,4 @@ if __name__ == "__main__":
 
     print('Start Testing')
     test(axs[1])
-    plt.show()
+    plt.savefig('nn.png')
