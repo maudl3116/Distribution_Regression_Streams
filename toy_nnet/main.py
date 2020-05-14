@@ -50,7 +50,7 @@ test_loader = data_utils.DataLoader(NdviDataset(data_file=root_dir+'input_list_R
 print('Init Model')
 if args.model=='LSTM':
     #model = MIL_LSTM(input_size=2, output_size=1, hidden_dim=10,n_layers=1)
-    model = MIL_LSTM(input_dim=2, output_dim=1, hidden_dim=10, layer_dim=1)
+    model = MIL_LSTM(input_dim=2, output_dim=1, hidden_dim=10,hidden_dim2=10, layer_dim=1)
 elif args.model=='RNN':
     model = MIL_RNN(input_dim=2, hidden_dim=10, output_dim=1)
 

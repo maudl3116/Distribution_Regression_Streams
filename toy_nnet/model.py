@@ -14,7 +14,7 @@ import torch.nn.functional as F
 
 class MIL_LSTM(nn.Module):
     #https://www.deeplearningwizard.com/deep_learning/practical_pytorch/pytorch_lstm_neuralnetwork/
-    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim):
+    def __init__(self, input_dim, hidden_dim, hidden_dim2,layer_dim, output_dim):
         super(MIL_LSTM, self).__init__()
         # Hidden dimensions
         self.hidden_dim = hidden_dim
@@ -28,7 +28,8 @@ class MIL_LSTM(nn.Module):
         self.lstm = nn.LSTM(input_dim, hidden_dim, layer_dim, batch_first=True)
 
         # Readout layer
-        self.fc = nn.Linear(hidden_dim, output_dim)
+        self.fc = nn.Linear(hidden_dim, hidden_dim2)
+        self.fc2 = nn.Linear(hidden_dim2, output_dim)
 
     def forward(self, x):
         # Initialize hidden state with zeros
@@ -45,7 +46,11 @@ class MIL_LSTM(nn.Module):
         # Index hidden state of last time step
         # out.size() --> 100, 28, 100
         # out[:, -1, :] --> 100, 100 --> just want last time step hidden states!
-        out = self.fc(out[:, -1, :])
+        out = out[:, -1, :].mean(axis=0)
+
+        out = self.fc(out)
+        out = nn.functional.relu(out)
+        out = self.fc2(out)
         # out.size() --> 100, 10
         return out
 
