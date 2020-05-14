@@ -49,7 +49,7 @@ test_loader = data_utils.DataLoader(NdviDataset(data_file=root_dir+'input_list_R
 
 print('Init Model')
 if args.model=='LSTM':
-    model = MIL_LSTM(input_dim=2, hidden_dim=10, output_dim=1)
+    model = MIL_LSTM(input_size=2, output_size=1, hidden_dim=10,n_layers=1)
 elif args.model=='RNN':
     model = MIL_RNN(input_dim=2, hidden_dim=10, output_dim=1)
 
@@ -75,6 +75,8 @@ def train(epoch,ax=None):
     labels_plot = []
     preds_plot = []
 
+
+
     for batch_idx, (data, bag_label) in enumerate(train_loader):
         data = data[0]
         if args.cuda:
@@ -88,7 +90,7 @@ def train(epoch,ax=None):
         y_pred = model(data)
         loss = Loss(y_pred,bag_label)
 
-        preds_plot.append(y_pred.mean().item().detach().cpu())
+        preds_plot.append(y_pred.mean().item())
         labels_plot.append(bag_label.detach().cpu())
 
         train_loss += loss.data
@@ -125,7 +127,7 @@ def test(ax):
 
         # calculate loss and metrics
         y_pred = model(data)
-        predictions.append(y_pred.mean().item().detach().cpu())
+        predictions.append(y_pred.mean().item())
         loss = Loss(y_pred,bag_label)
         labels.append(bag_label.detach().cpu())
         test_loss += loss.data

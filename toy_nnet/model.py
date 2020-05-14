@@ -14,46 +14,44 @@ import torch.nn.functional as F
 
 
 class MIL_LSTM(nn.Module):
-
-    def __init__(self, input_dim, hidden_dim, output_dim,
-                 num_layers=2):
+    def __init__(self, input_size, output_size, hidden_dim, n_layers):
         super(MIL_LSTM, self).__init__()
-        self.input_dim = input_dim
+
+        # Defining some parameters
         self.hidden_dim = hidden_dim
-        self.num_layers = num_layers
+        self.n_layers = n_layers
 
-        # Define the LSTM layer
-        self.lstm = nn.LSTM(self.input_dim, self.hidden_dim, self.num_layers)
+        # Defining the layers
+        # RNN Layer
+        self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True)
+        # Fully connected layer
+        self.fc = nn.Linear(hidden_dim, output_size)
 
-        # Define the output layer
-        self.linear = nn.Linear(self.hidden_dim, output_dim)
+    def forward(self, x):
+        batch_size = x.size(0)
 
-    # def init_hidden(self):
-    #     # This is what we'll initialise our hidden state as
-    #     return (torch.zeros(self.num_layers, self.batch_size, self.hidden_dim),
-    #             torch.zeros(self.num_layers, self.batch_size, self.hidden_dim))
+        # Initializing hidden state for first input using method defined below
+        hidden = self.init_hidden(batch_size)
 
-    def forward(self, batch):
-        # Forward pass through LSTM layer
-        # shape of lstm_out: [input_size, batch_size, hidden_dim]
-        # shape of self.hidden: (a, b), where a and b both
-        # have shape (num_layers, batch_size, hidden_dim).
+        # Passing in the input and hidden state into the model and obtaining outputs
+        out, hidden = self.rnn(x, hidden)
 
-        lstm_out, self.hidden = self.lstm(x_pack)#self.lstm(batch.view(len(batch), self.batch_size, -1))
+        # Reshaping the outputs such that it can be fit into the fully connected layer
+        out = out.contiguous().view(-1, self.hidden_dim)
+        out = self.fc(out)
 
-        # Only take the output from the final timetep
-        # Can pass on the entirety of lstm_out to the next layer if it is a seq2seq prediction
-        unpacked, unpacked_len = torch.nn.utils.rnn.pad_packed_sequence(lstm_out, batch_first=True)
+        return out
 
-        y_pred = self.linear(unpacked.transpose(0,1)[-1])#.view(self.batch_size, -1))
-
-        return y_pred
-
+    def init_hidden(self, batch_size):
+        # This method generates the first hidden state of zeros which we'll use in the forward pass
+        # We'll send the tensor holding the hidden state to the device we specified earlier as well
+        hidden = torch.zeros(self.n_layers, batch_size, self.hidden_dim)
+        return hidden
 
 class MIL_RNN(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, output_dim,
-                 num_layers=2):
+                 num_layers=1):
         super(MIL_RNN, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
@@ -63,7 +61,7 @@ class MIL_RNN(nn.Module):
         self.rnn = nn.RNN(self.input_dim, self.hidden_dim, self.num_layers,batch_first=True)
 
         # Define the output layer
-        self.linear = nn.Linear(self.hidden_dim, self.hidden_dim)
+        self.linear = nn.Linear(self.hidden_dim, output_dim)
         self.linear2 = nn.Linear(self.hidden_dim, output_dim)
     # def init_hidden(self):
     #     # This is what we'll initialise our hidden state as
@@ -87,8 +85,6 @@ class MIL_RNN(nn.Module):
         # Can pass on the entirety of lstm_out to the next layer if it is a seq2seq prediction
 
         y_pred = self.linear(rnn_out[:, -1, :])#unpacked.transpose(0,1)[-1]
-        y_pred = F.relu(y_pred)
-        y_pred = self.linear2(y_pred)
         return y_pred
 
     def init_hidden(self, batch_size):
