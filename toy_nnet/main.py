@@ -49,7 +49,8 @@ test_loader = data_utils.DataLoader(NdviDataset(data_file=root_dir+'input_list_R
 
 print('Init Model')
 if args.model=='LSTM':
-    model = MIL_LSTM(input_size=2, output_size=1, hidden_dim=10,n_layers=1)
+    #model = MIL_LSTM(input_size=2, output_size=1, hidden_dim=10,n_layers=1)
+    model = MIL_LSTM(input_dim=2, output_dim=1, hidden_dim=10, layer_dim=1)
 elif args.model=='RNN':
     model = MIL_RNN(input_dim=2, hidden_dim=10, output_dim=1)
 
@@ -104,7 +105,7 @@ def train(epoch,ax=None):
     # calculate loss for epoch
     train_loss /= nb_bags
 
-    if True:
+    if epoch%100==0:
         print('Epoch: {}, Loss: {:.4f}'.format(epoch, train_loss.item()))
 
     if not ax is None:
