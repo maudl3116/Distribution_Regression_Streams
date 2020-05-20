@@ -256,7 +256,7 @@ class GP():
 
         if RBF_top:
             K = self.K_eval_full(X_train, X_train)
-            K = self.transform_softplus(self.variance) * self.get_K_top_RBF(K)
+            K = self.transform_softplus(self.variance_top) * self.get_K_top_RBF(K)
         else:
             K = self.transform_softplus(self.variance) * self.K_eval_full(X_train, X_train)
 
@@ -274,8 +274,8 @@ class GP():
                 # X_full = torch.cat((X_train,X_test))
                 K_full = self.K_eval_full(X_train + X_test, X_train + X_test)
                 K_ss = self.K_eval_full(X_test, X_test)
-                K_ss = self.transform_softplus(self.variance) * self.get_K_top_RBF(K_ss)
-                K_s = self.transform_softplus(self.variance) * self.get_K_top_RBF(K_full, len(X_train))
+                K_ss = self.transform_softplus(self.variance_top) * self.get_K_top_RBF(K_ss)
+                K_s = self.transform_softplus(self.variance_top) * self.get_K_top_RBF(K_full, len(X_train))
 
         else:
             if test == False:
