@@ -9,7 +9,7 @@ from utils.addtime import AddTime, LeadLag
 import utils.experiments as experiments
 import pickle
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 import iisignature
 import utils.signature_features as signature_features
 
@@ -65,6 +65,8 @@ def rbf_e_sig(train_indices_list, test_indices_list, input_, y_):
     r2_train_list = []
     rmse_train_list = []
     rmse_test_list = []
+    mape_train_list = []
+    mape_test_list = []
     # lengthscales = []
 
     for fold in range(len(train_indices_list)):
@@ -82,7 +84,7 @@ def rbf_e_sig(train_indices_list, test_indices_list, input_, y_):
         # # Precompute the Gram matrix
         K_precomputed = experiments.precompute_K(features)
 
-        rmse_train, r2_train, rmse_test, r2_test = experiments.experiment_precomputed(K_precomputed, y_, train_indices,
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = experiments.experiment_precomputed(K_precomputed, y_, train_indices,
                                                                                       test_indices,
                                                                                       param_init=[0, 30, 0], RBF=True,
                                                                                       plot=False)
@@ -92,10 +94,12 @@ def rbf_e_sig(train_indices_list, test_indices_list, input_, y_):
 
         rmse_train_list.append(rmse_train)
         r2_train_list.append(r2_train)
+        mape_train_list.append(mape_train)
         rmse_test_list.append(rmse_test)
         r2_test_list.append(r2_test)
+        mape_test_list.append(mape_test)
 
-    return rmse_train_list, r2_train_list, rmse_test_list, r2_test_list
+    return rmse_train_list, r2_train_list, mape_train_list, rmse_test_list, r2_test_list, mape_test_list
 
 
 def pathwise_e_sig(train_indices_list, test_indices_list, input_, y_):
@@ -105,6 +109,8 @@ def pathwise_e_sig(train_indices_list, test_indices_list, input_, y_):
     r2_train_list = []
     rmse_train_list = []
     rmse_test_list = []
+    mape_train_list = []
+    mape_test_list = []
 
     for fold in range(len(train_indices_list)):
         train_indices = train_indices_list[fold]
@@ -121,17 +127,19 @@ def pathwise_e_sig(train_indices_list, test_indices_list, input_, y_):
         # # Precompute the Gram matrix
         K_precomputed = experiments.precompute_K(features)
 
-        rmse_train, r2_train, rmse_test, r2_test = experiments.experiment_precomputed(K_precomputed, y_, train_indices,
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = experiments.experiment_precomputed(K_precomputed, y_, train_indices,
                                                                                       test_indices,
                                                                                       param_init=[0, 30, 0], RBF=False,
                                                                                       plot=False)
 
         rmse_train_list.append(rmse_train)
         r2_train_list.append(r2_train)
+        mape_train_list.append(mape_train)
         rmse_test_list.append(rmse_test)
         r2_test_list.append(r2_test)
+        mape_test_list.append(mape_test)
 
-    return rmse_train_list, r2_train_list, rmse_test_list, r2_test_list
+    return rmse_train_list, r2_train_list, mape_train_list, rmse_test_list, r2_test_list, mape_test_list
 
 
 def rbf_rbf(train_indices_list, test_indices_list, input_, y_):
@@ -141,6 +149,8 @@ def rbf_rbf(train_indices_list, test_indices_list, input_, y_):
     r2_train_list = []
     rmse_train_list = []
     rmse_test_list = []
+    mape_train_list = []
+    mape_test_list = []
 
     for fold in range(len(train_indices_list)):
 
@@ -156,7 +166,7 @@ def rbf_rbf(train_indices_list, test_indices_list, input_, y_):
             input_ordered.append(input_reshaped[i])
             labels_ordered.append(y_[i, 0])
 
-        rmse_train, r2_train, rmse_test, r2_test = experiments.naive_experiment_arbitrary(input_ordered,
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = experiments.naive_experiment_arbitrary(input_ordered,
                                                                                           np.array(labels_ordered)[:,
                                                                                           None],
                                                                                           len(train_indices), ARD=False,
@@ -166,10 +176,12 @@ def rbf_rbf(train_indices_list, test_indices_list, input_, y_):
                                                                                           device=torch.device("cuda"))
         rmse_train_list.append(rmse_train)
         r2_train_list.append(r2_train)
+        mape_train_list.append(mape_train)
         rmse_test_list.append(rmse_test)
         r2_test_list.append(r2_test)
+        mape_test_list.append(mape_test)
 
-    return rmse_train_list, r2_train_list, rmse_test_list, r2_test_list
+    return rmse_train_list, r2_train_list, mape_train_list, rmse_test_list, r2_test_list, mape_test_list
 
 
 def lin_rbf(train_indices_list, test_indices_list, input_, y_):
@@ -177,6 +189,8 @@ def lin_rbf(train_indices_list, test_indices_list, input_, y_):
     r2_train_list = []
     rmse_train_list = []
     rmse_test_list = []
+    mape_train_list = []
+    mape_test_list = []
 
     input_reshaped = [np.concatenate([bag[:, :, k] for k in range(2)], axis=1) for bag in input_]
 
@@ -194,7 +208,7 @@ def lin_rbf(train_indices_list, test_indices_list, input_, y_):
             input_ordered.append(input_reshaped[i])
             labels_ordered.append(y_[i, 0])
 
-        rmse_train, r2_train, rmse_test, r2_test = experiments.naive_experiment_arbitrary(input_ordered,
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = experiments.naive_experiment_arbitrary(input_ordered,
                                                                                           np.array(labels_ordered)[:,
                                                                                           None],
                                                                                           len(train_indices), ARD=False,
@@ -204,10 +218,12 @@ def lin_rbf(train_indices_list, test_indices_list, input_, y_):
                                                                                           device=torch.device("cuda"))
         rmse_train_list.append(rmse_train)
         r2_train_list.append(r2_train)
+        mape_train_list.append(mape_train)
         rmse_test_list.append(rmse_test)
         r2_test_list.append(r2_test)
+        mape_test_list.append(mape_test)
 
-    return rmse_train_list, r2_train_list, rmse_test_list, r2_test_list
+    return rmse_train_list, r2_train_list, mape_train_list, rmse_test_list, r2_test_list, mape_test_list
 
 
 if __name__ == "__main__":
@@ -243,9 +259,15 @@ if __name__ == "__main__":
 
     train_indices_list = []
     test_indices_list = []
-    skf = StratifiedKFold(n_splits=nb_folds, shuffle=True, random_state=0)
-    skf.get_n_splits(np.arange(len(y)), y_binned)
-    for train_index, test_index in skf.split(np.arange(len(y)), y_binned):
+    # skf = StratifiedKFold(n_splits=nb_folds, shuffle=True, random_state=0)
+    # skf.get_n_splits(np.arange(len(y)), y_binned)
+    # for train_index, test_index in skf.split(np.arange(len(y)), y_binned):
+    #     train_indices_list.append(train_index)
+    #     test_indices_list.append(test_index)
+
+    skf = KFold(n_splits=nb_folds, shuffle=True, random_state=42)
+    skf.get_n_splits(np.arange(len(y)))
+    for train_index, test_index in skf.split(np.arange(len(y))):
         train_indices_list.append(train_index)
         test_indices_list.append(test_index)
 
@@ -254,21 +276,20 @@ if __name__ == "__main__":
     # evaluate methods
 
     if args.rbf_e_sig:
-        rmse_train, r2_train, rmse_test, r2_test = rbf_e_sig(train_indices_list, test_indices_list, input_, y_)
-        dico['rbf_e_sig'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'rmse_test': rmse_test, 'r2_test': r2_test}
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = rbf_e_sig(train_indices_list, test_indices_list, input_, y_)
+        dico['rbf_e_sig'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'mape_train':mape_train,'rmse_test': rmse_test, 'r2_test': r2_test,'mape_test':mape_test}
 
     if args.pathwise_e_sig:
-        rmse_train, r2_train, rmse_test, r2_test = pathwise_e_sig(train_indices_list, test_indices_list, input_, y_)
-        dico['pathwise_e_sig'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'rmse_test': rmse_test,
-                                  'r2_test': r2_test}
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test  = pathwise_e_sig(train_indices_list, test_indices_list, input_, y_)
+        dico['pathwise_e_sig'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'mape_train':mape_train,'rmse_test': rmse_test, 'r2_test': r2_test,'mape_test':mape_test}
 
     if args.rbf_rbf:
-        rmse_train, r2_train, rmse_test, r2_test = rbf_rbf(train_indices_list, test_indices_list, input_, y_)
-        dico['rbf_rbf'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'rmse_test': rmse_test, 'r2_test': r2_test}
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test  = rbf_rbf(train_indices_list, test_indices_list, input_, y_)
+        dico['rbf_rbf'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'mape_train':mape_train,'rmse_test': rmse_test, 'r2_test': r2_test,'mape_test':mape_test}
 
     if args.lin_rbf:
-        rmse_train, r2_train, rmse_test, r2_test = lin_rbf(train_indices_list, test_indices_list, input_, y_)
-        dico['lin_rbf'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'rmse_test': rmse_test, 'r2_test': r2_test}
+        rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test  = lin_rbf(train_indices_list, test_indices_list, input_, y_)
+        dico['lin_rbf'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'mape_train':mape_train,'rmse_test': rmse_test, 'r2_test': r2_test,'mape_test':mape_test}
 
     pickle.dump(dico, open('results.obj', 'wb'))
 
