@@ -161,10 +161,10 @@ class GP():
         y, mask_y = self.pad_mask(y)
 
         if self.device == torch.device('cuda'):
-            self.x = self.x.cuda()
-            self.mask_x = self.mask_x.cuda()
-            self.y = self.y.cuda()
-            self.mask_y = self.mask_y.cuda()
+            x = x.cuda()
+            mask_x = mask_x.cuda()
+            y = y.cuda()
+            mask_y = mask_y.cuda()
 
         x = x.div(tf_lengthscales[None, :, None])
         y = y.div(tf_lengthscales[None, :, None])

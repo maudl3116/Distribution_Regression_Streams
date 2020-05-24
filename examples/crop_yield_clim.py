@@ -263,6 +263,7 @@ if __name__ == "__main__":
     #     nb = min(max_nb_items, len(bag))
     #     input_.append(bag[:nb])
     input_ = input_list
+    input_baseline = pickle.load(open('../data/crops/clim_summary_bags.obj', 'rb'))
 
     # create spatial train/test splits
     dico_geom = pickle.load(open('../data/crops/dico_geom.obj', 'rb'))
@@ -334,13 +335,13 @@ if __name__ == "__main__":
 
     if args.rbf_rbf:
         rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = rbf_rbf(train_indices_list, test_indices_list,
-                                                                                  input_, labels)
+                                                                                  input_baseline, labels)
         dico['rbf_rbf'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'mape_train': mape_train,
                            'rmse_test': rmse_test, 'r2_test': r2_test, 'mape_test': mape_test}
 
     if args.lin_rbf:
         rmse_train, r2_train, mape_train, rmse_test, r2_test, mape_test = lin_rbf(train_indices_list, test_indices_list,
-                                                                                  input_, labels)
+                                                                                  input_baseline, labels)
         dico['lin_rbf'] = {'rmse_train': rmse_train, 'r2_train': r2_train, 'mape_train': mape_train,
                            'rmse_test': rmse_test, 'r2_test': r2_test, 'mape_test': mape_test}
 
