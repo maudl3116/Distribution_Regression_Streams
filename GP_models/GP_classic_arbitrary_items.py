@@ -53,9 +53,9 @@ class GP():
         self.dtype = dtype
 
         self.Y = Y
-        print('start mask')
+
         self.training_data, self.mask = self.pad_mask(X)  # N_bags x timexD x N_items
-        print('end mask')
+
         if device == torch.device('cuda'):
             self.training_data = self.training_data.cuda()
             self.mask = self.mask.cuda()
@@ -109,7 +109,7 @@ class GP():
                       axis=1)[None, :, :] if e.shape[1] < max_pixels else e[None, :, :] for e in X]
 
         padded_mask = [torch.cat(
-            (e, np.nan * torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=self.dtype, device=self.device)),
+            (e, np.nan * torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=torch.uint8, device=self.device)),
             axis=1)[None, :, :] if e.shape[1] < max_pixels else e[None, :, :] for e in X]
         training_data = torch.cat(padded)
         mask = torch.cat(padded_mask)
