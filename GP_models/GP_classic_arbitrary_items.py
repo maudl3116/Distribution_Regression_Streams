@@ -50,7 +50,7 @@ class GP():
                  device=torch.device("cpu")):
 
         self.device = device
-        self.dtype = dtype
+        self.dtype = torch.float32
 
         self.Y = Y
 
@@ -104,12 +104,13 @@ class GP():
         self.n_items = max_pixels
 
         # pad with nans
+
         padded = [
-            torch.cat((e, torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=self.dtype, device=self.device)),
+            torch.cat((e, torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=self.dtype)),
                       axis=1)[None, :, :] if e.shape[1] < max_pixels else e[None, :, :] for e in X]
 
         padded_mask = [torch.cat(
-            (e, np.nan * torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=torch.uint8, device=self.device)),
+            (e, np.nan * torch.zeros((e.shape[0], max_pixels - e.shape[1]), dtype=torch.uint8)),
             axis=1)[None, :, :] if e.shape[1] < max_pixels else e[None, :, :] for e in X]
         training_data = torch.cat(padded)
         mask = torch.cat(padded_mask)
@@ -158,8 +159,17 @@ class GP():
         # x is of shape [N_bags x T x N_items]
         x, mask_x = self.pad_mask(x)
         y, mask_y = self.pad_mask(y)
+
+        if self.device == torch.device('cuda'):
+            self.x = self.x.cuda()
+            self.mask_x = self.mask_x.cuda()
+            self.y = self.y.cuda()
+            self.mask_y = self.mask_y.cuda()
+
         x = x.div(tf_lengthscales[None, :, None])
         y = y.div(tf_lengthscales[None, :, None])
+
+
 
         yy = y.repeat(1, 1, self.n_items)
 

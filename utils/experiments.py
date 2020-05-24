@@ -78,10 +78,10 @@ def naive_experiment_arbitrary(x, y, train_index, ARD=False, RBF_top=False, para
     # x_train is of shape N_bags x N_items x time*D
     # changed into N_bags x timexD x N_items
 
-    x_train = [torch.tensor(e, dtype=torch.float64, device=device).transpose(0, 1) for e in x_train]
-    x_test = [torch.tensor(e, dtype=torch.float64, device=device).transpose(0, 1) for e in x_test]
+    x_train = [torch.Tensor(e).transpose(0, 1) for e in x_train]
+    x_test = [torch.Tensor(e).transpose(0, 1) for e in x_test]
 
-    model = GP_naive_arbitrary_items.GP(x_train, torch.tensor(y_train, dtype=torch.float64), param_init[0],
+    model = GP_naive_arbitrary_items.GP(x_train, torch.Tensor(y_train), param_init[0],
                                         param_init[1], param_init[2], param_init[3],
                                         ['lengthscale', 'variance', 'noise'], ARD=ARD, device=device)
     if plot:
