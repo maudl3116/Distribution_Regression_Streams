@@ -18,9 +18,7 @@ from sklearn.svm import SVR
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.pipeline import Pipeline
 
-tuned_parameters = [{'svm__kernel': ['poly'], 'svm__gamma': ['auto'], 
-                     'svm__C': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3], 'svm__degree': [1, 2, 3, 4, 5, 6]},
-                    {'svm__kernel': ['rbf'], 'svm__gamma': ['auto'], 
+tuned_parameters = [{'svm__kernel': ['rbf'], 'svm__gamma': [1e-6, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1e6, 'auto'], 
                      'svm__C': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}]
 
 def fOU_generator(a,n=0.3,h=0.3,length=100):
