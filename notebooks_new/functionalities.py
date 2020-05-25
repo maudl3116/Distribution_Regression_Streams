@@ -18,6 +18,9 @@ from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
+from sklearn.cluster import KMeans
+import pickle
+
 # epsilon=0 -> Kernel Ridge Regression
 # epsilon>0 -> SVM (Regression)
 tuned_parameters = [{'svm__kernel': ['rbf'], 'svm__epsilon':[0., 0.1],
@@ -73,7 +76,7 @@ def poly_SVM(degree, X, y):
     return -scores.mean(), scores.std()
 
 
-def ESig_SVM(depth, X, y, ll=True, at=True, ss=False): 
+def ESig_SVM(depth, X, y, ll=True, at=True, ss=False,targets_dico=None,spatial_CV=False,temporal_CV=False):
     
     """Performs a ESig(depth)-SVM distribution regression on ensembles (of possibly unequal size) 
        of univariate or multivariate time-series equal of unequal lengths 
@@ -116,10 +119,16 @@ def ESig_SVM(depth, X, y, ll=True, at=True, ss=False):
         pipe = Pipeline([('std_scaler', StandardScaler()), ('svm', SVR())])
     else:
         pipe = Pipeline([('svm', SVR())])
-    
-    # set-up grid-search over 5 random folds
-    clf = GridSearchCV(pipe, tuned_parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error')
-    
+
+    if spatial_CV:  ## TO ADD
+        splits = spatial_CV(nb_folds=7, targets_dico=targets_dico)
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, cv=splits, n_jobs=-1, scoring='neg_mean_squared_error')
+    elif temporal_CV:
+        splits = temporal_CV(targets_dico=targets_dico)
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, cv=splits, n_jobs=-1, scoring='neg_mean_squared_error')
+    else:
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error')
+
     # find best estimator via grid search 
     clf.fit(X_esig, y)
     
@@ -131,7 +140,7 @@ def ESig_SVM(depth, X, y, ll=True, at=True, ss=False):
     return -scores.mean(), scores.std()
 
 
-def SigESig_LinReg(depth1, depth2, X, y, ll=True, at=False, ss=False):
+def SigESig_LinReg(depth1, depth2, X, y, ll=True, at=False, ss=False,targets_dico=None,spatial_CV=False,temporal_CV=False):
     
     """Performs a SigESig(depth)-Linear distribution regression on ensembles (of possibly unequal size) 
        of univariate or multivariate time-series equal of unequal lengths 
@@ -191,10 +200,16 @@ def SigESig_LinReg(depth1, depth2, X, y, ll=True, at=False, ss=False):
         pipe = Pipeline([('std_scaler', StandardScaler()),('lin_reg', Lasso(max_iter=1000))])
     else:
         pipe = Pipeline([('lin_reg', Lasso(max_iter=1000))])
-    
-    # set-up grid-search over 5 random folds
-    clf = GridSearchCV(pipe, parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error')
-    
+
+    if spatial_CV:  ## TO ADD
+        splits = spatial_CV(nb_folds=7, targets_dico=targets_dico)
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, cv=splits, n_jobs=-1, scoring='neg_mean_squared_error')
+    elif temporal_CV:
+        splits = temporal_CV(targets_dico=targets_dico)
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, cv=splits, n_jobs=-1, scoring='neg_mean_squared_error')
+    else:
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error')
+
     # find best estimator via grid search 
     clf.fit(X_sigEsig, y)
     
@@ -206,7 +221,7 @@ def SigESig_LinReg(depth1, depth2, X, y, ll=True, at=False, ss=False):
     return -scores.mean(), scores.std()
 
 
-def RBF_RBF_SVM(X, y,region_labels=None):
+def RBF_RBF_SVM(X, y,region_labels=None,targets_dico=None,spatial_CV=False,temporal_CV=False):
     """Performs a RBF-RBF-SVM distribution regression on ensembles (of possibly unequal size)
        of univariate or multivariate time-series equal of unequal lengths
 
@@ -248,8 +263,14 @@ def RBF_RBF_SVM(X, y,region_labels=None):
                      ('rbf_rbf', RBF_RBF(max_items = max_items, size_item=dim_path*common_T)),
                      ('svm', SVR())])
 
-    # set-up grid-search over 5 random folds
-    clf = GridSearchCV(pipe, parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error')
+    if spatial_CV:  ## TO ADD
+        splits = spatial_CV(nb_folds=7, targets_dico=targets_dico)
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, cv=splits, n_jobs=-1, scoring='neg_mean_squared_error')
+    elif temporal_CV:
+        splits = temporal_CV(targets_dico=targets_dico)
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, cv=splits, n_jobs=-1, scoring='neg_mean_squared_error')
+    else:
+        clf = GridSearchCV(pipe, tuned_parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error')
 
     # find best estimator via grid search
     clf.fit(X, y)
@@ -360,7 +381,7 @@ def bags_to_2D(input_):
     T = [e[0].shape[0] for e in input_]
     common_T = min(T)  # for other datasets would consider padding. Here we are just missing 10 values from time to time
 
-    unlist_items = [np.concatenate([item[None, :common_T, :] for item in bag[:30]], axis=0) for bag in input_]
+    unlist_items = [np.concatenate([item[None, :common_T, :] for item in bag], axis=0) for bag in input_]
 
     # stack dimensions (we get a list of bags, where each bag is N_items x 3T)
     dim_stacked = [np.concatenate([bag[:, :common_T, k] for k in range(dim_path)], axis=1) for bag in unlist_items]
@@ -379,3 +400,62 @@ def bags_to_2D(input_):
     X = np.array(items_naned)
 
     return X, max_items, common_T, dim_path
+
+
+def spatial_CV(nb_folds, targets_dico):  # TO ADD
+
+    # create spatial train/test splits
+    dico_geom = pickle.load(open('../data/crops/dico_geom.obj', 'rb'))
+
+    clusters = KMeans(n_clusters=nb_folds, n_jobs=-1, random_state=2)
+    clusters.fit(list(dico_geom.values()))
+
+    v_lookup = {}
+    for i in range(len(clusters.labels_)):
+        v_lookup[list(dico_geom.keys())[i]] = clusters.labels_[i]
+
+    splits = []
+    for i in range(nb_folds):
+
+        # train indices : all but cluster i
+        train_indices = []
+        # test indices : cluster i
+        test_indices = []
+
+        for k in range(len(targets_dico)):
+            # get region for the point
+            region = list(targets_dico.keys())[k][1]
+            if v_lookup[region] != i:  # gives in which cluster the region is
+                train_indices.append(k)
+            else:
+                test_indices.append(k)
+
+        splits.append((train_indices, test_indices))
+
+    return splits
+
+
+def temporal_CV(targets_dico):  # TO ADD
+
+    years = [int(key[0]) for key in targets_dico.keys()]
+    years = np.sort(np.unique(np.array(years)))
+
+    splits = []
+    for i in range(len(years) - 1):
+
+        # train indices : all previous years
+        train_indices = []
+        # test indices : year to predict
+        test_indices = []
+
+        for k in range(len(targets_dico)):
+            # get region for the point
+            year = int(list(targets_dico.keys())[k][0])
+            if year < years[i + 1]:  # gives in which cluster the region is
+                train_indices.append(k)
+            else:
+                test_indices.append(k)
+
+        splits.append((train_indices, test_indices))
+
+    return splits
