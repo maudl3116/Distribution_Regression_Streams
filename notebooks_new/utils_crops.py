@@ -2,14 +2,31 @@ from sklearn.cluster import KMeans
 import numpy as np
 import pickle
 
-def bags_to_2D(input_):
 
+def get_sig_keys(dico,sig_level):
+    
+    ndims = len(dico)
+    
+    keys = esig.sigkeys(ndims,sig_level).split("(")
+    sig_keys = []
+
+    for i in range(2,len(keys)-1):
+        sig_keys.append(np.array(keys[i][:-2].split(',')))
+    sig_keys.append(np.array(keys[len(keys)-1][:-1].split(',')))
+    
+    features_names = {}
+    for i in range(len(sig_keys)):
+        separator = '-'
+        name = separator.join([dico[int(e)] for e in sig_keys[i]])
+        features_names[1+i]= name
+
+    return features_names
+
+def subsample(input_,p):
     '''
-    For the RBF-RBF model, we have defined a customed kernel in sklearn. An sklearn pipeline takes in input
-    a 2D array (n_samples, n_features). Whilst we have data in the form of bags of items, where each item is a D-dimensional time series
-    represented as a list of list of (LxD) matrices, where L is the length of the time series.
-
-    This function transforms lists of lists of D-dimensional time series into a 2D array.
+    
+    This function applies random subsampling of bags of items of D-dimensional time-series. All dimensions of the time-series 
+    are observed/dropped at the same time. 
 
        Input:
               input_ (list): list of lists of (length,dim) arrays
@@ -19,36 +36,28 @@ def bags_to_2D(input_):
                         - for any i, input_[i] is a list of n_items arrays of shape (length, dim)
 
                         - for any j, input_[i][j] is an array of shape (length, dim)
+               p   (float): the percentage of observations to drop. Should be between 0 and 1 
 
-       Output: a 2D array of shape (n_bags,n_items x length x dim)
+       Output: input_ (list): list of lists of (length*(1-p),dim) arrays
 
     '''
+    
+    assert p>=0 and p<1
+    
+    new_input_ = []
+    
+    for i in range(len(input_)): # loop through bags
+        new_bag = []
+        for j in range(len(input_[i])): # loop through items
+            L = len(input_[i][j])
+            # Number of observations to select
+            N = (1.-p)*L
+            time_stamps_kept = np.sort(np.random.choice(np.arange(L),round(N),replace=False))
+            new_bag.append(input_[i][j][time_stamps_kept,:])
+        new_input_.append(new_bag)
+            
+    return new_input_
 
-    dim_path = input_[0][0].shape[1]
-
-    # adjust time and concatenate the dimensions
-    T = [e[0].shape[0] for e in input_]
-    common_T = min(T)  # for other datasets would consider padding. Here we are just missing 10 values from time to time
-
-    unlist_items = [np.concatenate([item[None, :common_T, :] for item in bag], axis=0) for bag in input_]
-
-    # stack dimensions (we get a list of bags, where each bag is N_items x 3T)
-    dim_stacked = [np.concatenate([bag[:, :common_T, k] for k in range(dim_path)], axis=1) for bag in unlist_items]
-
-    # stack the items, we have item1(temp-hum-rain) - items2(temp-hum-rain) ...
-    items_stacked = [bag.flatten() for bag in dim_stacked]
-
-    # retrieve the maximum number of items
-    max_ = [bag.shape for bag in items_stacked]
-    max_ = np.max(max_)
-    max_items = int(max_ / (dim_path * common_T))
-
-    # pad the vectors with nan items such that we can obtain a 2d array.
-    items_naned = [np.append(bag, (max_ - len(bag)) * [np.nan]) for bag in items_stacked]  # np.nan
-
-    X = np.array(items_naned)
-
-    return X, max_items, common_T, dim_path
 
 def spatial_CV(nb_folds, targets_dico):
     '''
