@@ -1,6 +1,7 @@
 from sklearn.cluster import KMeans
 import numpy as np
 import pickle
+from esig import tosig as esig
 
 
 def get_sig_keys(dico,sig_level):
@@ -78,7 +79,7 @@ def spatial_CV(nb_folds, targets_dico):
 
     # Create spatial train/test splits. For this we need to get geographical information about the nut regions.
     # These are stored in dico_geom.obj
-    dico_geom = pickle.load(open('crops/dico_geom.obj', 'rb'))
+    dico_geom = pickle.load(open('../data/dico_geom.obj', 'rb'))
 
     clusters = KMeans(n_clusters=nb_folds, n_jobs=-1, random_state=2)
     clusters.fit(list(dico_geom.values()))

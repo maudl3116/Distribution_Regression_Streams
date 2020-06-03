@@ -1,4 +1,5 @@
-''' Copyright 2017 labay11 - This code is fully based on the repository https://github.com/labay11/ideal-gas-simulation
+''' Copyright 2017 labay11 - This code is fully based on the repository
+                  https://github.com/labay11/ideal-gas-simulation
 The functions have been from a class implementing matplotlib.animation.TimedAnimation.
 '''
 
@@ -31,7 +32,7 @@ class Sim():
         Complete code for the ideal gas animation.
     """
 
-    def __init__(self, n_particles, mass, rad, T, V, max_time, dt=0.2):
+    def __init__(self, n_particles, rad, T, V, max_time, dt, mass=1.2e-20):
         """
             Initiallisation of parameters
             ::n_particles:: number of particles in the system
@@ -199,6 +200,5 @@ class Sim():
             self.ex_p = 0.0
         return self.r
 
-
-# def V(t, V0, Vf, t_max):
-#     return V0 + (Vf - V0) * t / t_max
+def V_(t, V0=1, Vf=10, t_max=5):
+    return V0 + (Vf - V0) * t / t_max

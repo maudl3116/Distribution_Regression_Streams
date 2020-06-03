@@ -8,14 +8,13 @@ from tqdm import tqdm as tqdm
 
 class DataIterator(object):
     def __init__(self, X, y, batch_size, shuffle=False):
-
-        self.X = X # X is of shape (n_bags, n_items, length x dim)
+        self.X = X # X is of shape (n_bags, n_items, lengthxdim)
         self.y = y # y is of shape (n_bags, )
         self.batch_size = batch_size # batch of bags
-        
         self.shuffle = shuffle
-        self.L = self.X.shape[0]
-        self.d = self.X.shape[2]
+        self.L = self.X.shape[0] # n_bags
+
+        self.d = self.X.shape[-1] # length x dim (flattened vectorial representation of a time-series)
             
     def __len__(self):
         return len(self.y)//self.batch_size
@@ -33,10 +32,44 @@ class DataIterator(object):
         start = 0
         end = self.batch_size
         while end <= self.L:
-            yield self.X[start:end], self.y[start:end]
+            yield self.X[start:end], self.y[start:end]  # X (batch_size , n_items, lengthxdim)
             start = end
             end += self.batch_size
+   
+       
+class DataIteratorSeq(object):
+    def __init__(self, X, y, shuffle=False):
+        
+        self.X = X # X is of shape (n_bags, n_items, length, dim)
+        self.y = y # y is of shape (n_bags, )
+        self.batch_size = 1 # one batch is one bag
+        self.shuffle = shuffle
+        self.L = self.X.shape[0] # n_bags
+        
+        # stack dimensions
+        self.X = self.X.reshape(X.shape[0],X.shape[1],X.shape[2]*X.shape[3])
+
+        self.d = self.X.shape[-1] # length x dim (flattened vectorial representation of a time-series)
             
+    def __len__(self):
+        return len(self.y)  # each batch is one bag
+
+    def get_iterator(self, loss=0.0):
+        if self.shuffle: 
+            rng_state = np.random.get_state()
+            np.random.shuffle(self.X)
+            np.random.set_state(rng_state)
+            np.random.shuffle(self.y)
+            np.random.set_state(rng_state)
+        return self.next_batch()
+                    
+    def next_batch(self):
+        start = 0
+        end = self.batch_size
+        while end <= self.L:
+            yield self.X[start:end], self.y[start:end]  # X (batch_size , n_items, lengthxdim)
+            start = end
+            end += self.batch_size
             
 class Trainer(object):
 
@@ -47,7 +80,7 @@ class Trainer(object):
 #         self.l = nn.L1Loss()
         self.l = nn.MSELoss()
         
-        self.optim = optim.Adam(self.model.parameters(), lr=0.001)
+        self.optim = optim.Adam(self.model.parameters(), lr=0.0001)
 #         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optim, factor=0.5, patience=50, verbose=True)
         
         self.num_epochs = num_epochs
@@ -98,24 +131,24 @@ class Trainer(object):
     
 class DeepSet(nn.Module):
 
-    def __init__(self, in_features, set_features=200):
+    def __init__(self, in_features, set_features=300):
         super(DeepSet, self).__init__()
         self.in_features = in_features
         self.out_features = set_features
         self.feature_extractor = nn.Sequential(
-            nn.Linear(in_features, 200),
+            nn.Linear(in_features, 300),
             nn.ReLU(),
-            nn.Linear(200, 100),
+            nn.Linear(300, 300),
             nn.ReLU(),
-            nn.Linear(100, set_features)
+            nn.Linear(300, set_features)
         )
 
         self.regressor = nn.Sequential(
-            nn.Linear(set_features, 100),
+            nn.Linear(set_features, 200),
             nn.ReLU(),
-            nn.Linear(100, 50),
+            nn.Linear(200, 100),
             nn.ReLU(),
-            nn.Linear(50, 1),
+            nn.Linear(100, 1),
         )
         
         self.add_module('0', self.feature_extractor)
@@ -130,26 +163,28 @@ class DeepSet(nn.Module):
             
     def forward(self, inp):
         x = self.feature_extractor(inp)
-        x = x.sum(dim=1)
+        x = x.sum(dim=1) # x: (batch_size, n_items, L*d) sum items
         x = self.regressor(x)
         return x
     
     
 class DeepSetRNN(nn.Module):
 
-    def __init__(self, in_features, set_features=100):
+    def __init__(self, in_features, set_features=50):
         super(DeepSetRNN, self).__init__()
         
-        self.in_features = in_features
-        self.out_features = set_features
-        self.feature_extractor = nn.RNN(in_features, set_features, 1, batch_first=True)
+        self.in_features = in_features  # the dimension of the time series
+        self.out_features = set_features # dim of the hidden state
+        self.feature_extractor = nn.RNN(input_size=in_features, hidden_size=set_features, num_layers=1, batch_first=True)
 
         self.regressor = nn.Sequential(
-            nn.Linear(set_features, 100),
+            nn.Linear(set_features, 30),
             nn.ReLU(),
-            nn.Linear(100, 50),
+            nn.Linear(30, 30),
             nn.ReLU(),
-            nn.Linear(50, 1),
+            nn.Linear(30, 10),
+            nn.ReLU(),
+            nn.Linear(10, 1),
         )
         
         self.add_module('0', self.feature_extractor)
@@ -223,8 +258,8 @@ class DeepSetLSTM(nn.Module):
         self.regressor = nn.Sequential(
             nn.Linear(set_features, 200),
             nn.ReLU(),
-            nn.Linear(200, 200),
-            nn.ReLU(),
+#             nn.Linear(200, 200),
+#             nn.ReLU(),
             nn.Linear(200, 1),
         )
         

@@ -47,7 +47,7 @@ def model(X, y, depth=3, ll=[0], at=True, ss=False, mode='krr', NUM_TRIALS=5,  c
     
     length = X[0][0].shape[0]
     dim = X[0][0].shape[1]  
-    flag_no_trick = length>100
+    flag_no_trick = dim<100
        
     if flag_no_trick: # take Esig feature map
         X_esig = []
@@ -81,8 +81,8 @@ def model(X, y, depth=3, ll=[0], at=True, ss=False, mode='krr', NUM_TRIALS=5,  c
     if mode == 'krr':
         if flag_no_trick:
             parameters = [{'clf__kernel': ['rbf'],
-                           'clf__gamma': [1e-6, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1e6, 'auto'], 
-                           'clf__alpha': [1e-6, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1e6]}]
+                           'clf__gamma': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3], 
+                           'clf__alpha': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}]
         else:
             parameters = [{'clf__kernel': ['precomputed'], 'clf__alpha':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
                            'esig_rbf__gamma':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}]
@@ -93,8 +93,8 @@ def model(X, y, depth=3, ll=[0], at=True, ss=False, mode='krr', NUM_TRIALS=5,  c
         
         if flag_no_trick:
             parameters = [{'clf__kernel': ['rbf'],
-                           'clf__gamma': [1e-6, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1e6, 'auto'], 
-                           'clf__C': [1e-6, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1e6]}]
+                           'clf__gamma': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3], 
+                           'clf__C': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}]
             
         else:
             parameters = [{'clf__kernel': ['precomputed'], 'clf__C':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
@@ -117,26 +117,23 @@ def model(X, y, depth=3, ll=[0], at=True, ss=False, mode='krr', NUM_TRIALS=5,  c
             pipe = Pipeline([('esig_rbf', ESig_RBF_Kernel(dim_path = dim,max_items = max_items, size_item=dim_path*common_T)),
                              ('clf', clf())])
       
-    nested_scores = np.zeros(NUM_TRIALS)
+    scores = np.zeros(NUM_TRIALS)
     
     # Loop for each trial
-    for i in range(NUM_TRIALS):
+    for i in tqdm(range(NUM_TRIALS)):
 
-        # Choose cross-validation techniques for the inner and outer loops,
-        # independently of the dataset.
-        # E.g "GroupKFold", "LeaveOneOut", "LeaveOneGroupOut", etc.
-        inner_cv = KFold(n_splits=cv, shuffle=True, random_state=i)
-        outer_cv = KFold(n_splits=cv, shuffle=True, random_state=i)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=None)
 
         # parameter search
-        model = GridSearchCV(pipe, parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error', cv=inner_cv)
-        model.fit(X, y)
+        model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv)
+        model.fit(X_train, y_train)
         
-        # Nested CV with parameter optimization
-        nested_score = cross_val_score(model, X=X, y=y, cv=outer_cv)
-        nested_scores[i] = nested_score.mean()
+        y_pred = model.predict(X_test)
+        
+        scores[i] = mean_squared_error(y_pred, y_test)
             
-    return -nested_scores.mean(), nested_scores.std()
+    return scores.mean(), scores.std()
+
 
     
 

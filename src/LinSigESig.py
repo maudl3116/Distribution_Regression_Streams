@@ -16,7 +16,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 
-def model(depth1, depth2, X, y, ll=[0], at=False, ss=False, NUM_TRIALS=5, cv=3):
+def model(X, y, depth1, depth2, ll=[0], at=False, ss=False, NUM_TRIALS=5, cv=3):
     
     """Performs a SigESig(depth)-Linear distribution regression on ensembles (of possibly unequal size) 
        of univariate or multivariate time-series equal of unequal lengths 
@@ -71,7 +71,7 @@ def model(depth1, depth2, X, y, ll=[0], at=False, ss=False, NUM_TRIALS=5, cv=3):
             intermediate = np.array(intermediate_intermediate)
             
         X_sigEsig.append(intermediate.mean(0))
-    X_sigEsig = np.array(X_sigEsig)
+    X = np.array(X_sigEsig)
     
     # parameters for grid search 
     parameters = [{'lin_reg__alpha': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2], 
@@ -85,23 +85,19 @@ def model(depth1, depth2, X, y, ll=[0], at=False, ss=False, NUM_TRIALS=5, cv=3):
         pipe = Pipeline([('lin_reg', Lasso(max_iter=1000))])
 
         
-    nested_scores = np.zeros(NUM_TRIALS)
+    scores = np.zeros(NUM_TRIALS)
     
     # Loop for each trial
-    for i in range(NUM_TRIALS):
+    for i in tqdm(range(NUM_TRIALS)):
 
-        # Choose cross-validation techniques for the inner and outer loops,
-        # independently of the dataset.
-        # E.g "GroupKFold", "LeaveOneOut", "LeaveOneGroupOut", etc.
-        inner_cv = KFold(n_splits=cv, shuffle=True, random_state=i)
-        outer_cv = KFold(n_splits=cv, shuffle=True, random_state=i)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=None)
 
         # parameter search
-        model = GridSearchCV(pipe, parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error', cv=inner_cv)
-        model.fit(X, y)
+        model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv)
+        model.fit(X_train, y_train)
         
-        # Nested CV with parameter optimization
-        nested_score = cross_val_score(model, X=X, y=y, cv=outer_cv)
-        nested_scores[i] = nested_score.mean()
+        y_pred = model.predict(X_test)
+        
+        scores[i] = mean_squared_error(y_pred, y_test)
             
-    return -nested_scores.mean(), nested_scores.std()
+    return scores.mean(), scores.std()
