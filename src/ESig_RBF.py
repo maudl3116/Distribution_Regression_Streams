@@ -9,7 +9,8 @@ import iisignature
 from SigKerPDESolver import SigKerMMD
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV, KFold, cross_val_score
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import mean_squared_error
 from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import Pipeline

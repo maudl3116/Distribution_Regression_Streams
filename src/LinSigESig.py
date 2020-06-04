@@ -8,7 +8,8 @@ import iisignature
 from utils import AddTime, LeadLag
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV, KFold, cross_val_score
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -74,7 +75,7 @@ def model(X, y, depth1, depth2, ll=[0], at=False, ss=False, NUM_TRIALS=5, cv=3):
     X = np.array(X_sigEsig)
     
     # parameters for grid search 
-    parameters = [{'lin_reg__alpha': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2], 
+    parameters = [{'lin_reg__alpha': [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6], 
                    'lin_reg__fit_intercept' : [True, False], 
                    'lin_reg__normalize' : [True, False]}]
                         
