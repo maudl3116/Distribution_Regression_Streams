@@ -80,7 +80,7 @@ def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5,  cv=3):
     # Loop for each trial
     for i in tqdm(range(NUM_TRIALS)):
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=None)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=i)
 
         # parameter search
         model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv)
