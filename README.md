@@ -1,10 +1,11 @@
 # Distribution Regression for Continuous-Time Processes
-Code to perform distribution regression on time-series via two models (kerES and linSES) based on the Expected Signature.
+Code to perform distribution regression (DR) on time-series via two models (kerES and linSES) based on the Expected Signature.
 
 ## Structure of the repository
 
-- The `src` folder contains the implementation of kerES and linSES, as well as two baselines (Support Distribution Machines
-(SDM) using a RBF kernel (RBF-RBF) [[1]](#1) and DeepSets [[2]](#2))
+- The `src` folder contains the implementation of kerES and linSES for DR on time-series , as well as an implementation of Support Distribution Machines (SDM) using RBF kernels (RBF-RBF) [[1]](#1) for DR on vectorial data. 
+- The `examples` folder contains notebooks to reproduce the experiments of the paper. 
+- The `data` folder contains precomputed datasets for the experiments. 
 
 ## Acknowledgments
 
