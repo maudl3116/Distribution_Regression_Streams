@@ -6,18 +6,16 @@ import iisignature
 import warnings
 
 with warnings.catch_warnings():
-    warnings.filterwarnings("ignore",category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
     import imp
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import as_float_array
 
 
-
 class AddTime(BaseEstimator, TransformerMixin):
     # sklearn-type estimator to add time as an extra dimension of a D-dimensional path.
     # Note that the input must be a list of arrays (i.e. a list of D-dimensional paths)
-
 
     def __init__(self, init_time=0., total_time=1.):
         self.init_time = init_time
@@ -34,7 +32,6 @@ class AddTime(BaseEstimator, TransformerMixin):
         return [[self.transform_instance(x) for x in bag] for bag in X]
 
 
-
 class LeadLag(BaseEstimator, TransformerMixin):
     # sklearn-type estimator to compute the Lead-Lag transform of a D-dimensional path.
     # Note that the input must be a list of arrays (i.e. a list of D-dimensional paths)
@@ -48,7 +45,7 @@ class LeadLag(BaseEstimator, TransformerMixin):
         return self
 
     def transform_instance_1D(self, x):
-        
+
         lag = []
         lead = []
 
@@ -68,7 +65,7 @@ class LeadLag(BaseEstimator, TransformerMixin):
             error_message = 'the input list "dimensions_to_lag" must contain integers which must be' \
                             ' < than the number of dimensions of the original feature space'
             raise NameError(error_message)
-        
+
         lead_components = []
         lag_components = []
 
@@ -79,10 +76,9 @@ class LeadLag(BaseEstimator, TransformerMixin):
                 lag_components.append(lag)
 
         return np.c_[lead_components + lag_components].T
-    
+
     def transform(self, X, y=None):
         return [[self.transform_instance_multiD(x) for x in bag] for bag in X]
-
 
 
 class ExpectedSignatureTransform(BaseEstimator, TransformerMixin):
@@ -96,13 +92,20 @@ class ExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X = [np.array([iisignature.sig(item, self.order) for item in bag]) for bag in X]
+        # get the lengths of all time series (across items across bags)
+        lengths = [item.shape[0] for bag in X for item in bag]
+        if len(list(set(lengths))) == 1:
+            # if all time series have the same length, the signatures can be computed in batch
+            X = [iisignature.sig(bag, self.order) for bag in X]
+        else:
+            X = [np.array([iisignature.sig(item, self.order) for item in bag]) for bag in X]
         return [x.mean(0) for x in X]
+
 
 class pathwiseExpectedSignatureTransform(BaseEstimator, TransformerMixin):
 
     def __init__(self, order):
-        if not isinstance(order, int) or order_n < 1:
+        if not isinstance(order, int) or order < 1:
             raise NameError('The order must be a positive integer.')
         self.order = order
 
@@ -110,8 +113,16 @@ class pathwiseExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        X = [np.array([iisignature.sig(item, self.order,2) for item in bag]) for bag in X]
+
+        # get the lengths of all time series (across items across bags)
+        lengths = [item.shape[0] for bag in X for item in bag]
+        if len(list(set(lengths))) == 1:
+            # if all time series have the same length, the (pathwise) signatures can be computed in batch
+            X = [iisignature.sig(bag, self.order, 2) for bag in X]
+        else:
+            X = [np.array([iisignature.sig(item, self.order, 2) for item in bag]) for bag in X]
         return [x.mean(0) for x in X]
+
 
 class SignatureTransform(BaseEstimator, TransformerMixin):
 
@@ -124,4 +135,10 @@ class SignatureTransform(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        return [iisignature.sig(item, self.order) for item in X]
+        # get the lengths of all pathwise expected signatures
+        lengths = [pwES.shape[0] for pwES in X]
+        if len(list(set(lengths))) == 1:
+            # if all pathwise expected signatures have the same length, the signatures can be computed in batch
+            return iisignature.sig(X, self.order)
+        else:
+            return [iisignature.sig(item, self.order) for item in X]

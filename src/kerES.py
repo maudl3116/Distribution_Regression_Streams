@@ -1,8 +1,10 @@
 import numpy as np
 from tqdm import tqdm as tqdm
 from itertools import chain, combinations
+from shutil import rmtree
 
 import warnings
+
 warnings.filterwarnings('ignore')
 
 from utils import bags_to_2D
@@ -18,8 +20,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-def model(X, y, mode='krr', NUM_TRIALS=5,  cv=3):
-    
+def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, grid={}):
     """Performs a ESig-RBF Kernel based distribution regression on ensembles (of possibly unequal size)
        of univariate or multivariate time-series equal of unequal lengths
 
@@ -33,84 +34,99 @@ def model(X, y, mode='krr', NUM_TRIALS=5,  cv=3):
                         - for any j, X[i][j] is an array of shape (length, dim)
 
               y (np.array): array of shape (n_samples,)
-                                
+
+              ll (list of ints): dimensions to lag
+              at (bool): if True pre-process the input path with add-time
+
               mode (str): "krr" -> Kernel Ridge Regression, 'svr' -> Support Vector Regresion
-              
+
               NUM_TRIALS, cv : parameters for nested cross-validation
-              
+
+              grid (dict): a dictionary to specify the hyperparameter grid for the gridsearch. Unspecified entries will be set by default
+
        Output: mean MSE (and std) (both scalars) of regression performance on a 5-fold (or custom spatial) cross-validation
     """
-    
+
     assert mode in ['svr', 'krr'], "mode must be either 'svr' or 'krr' "
 
-    # for the lead-lag transformation
-    ll = [x for x in powerset(list(np.arange(X[0][0].shape[1])))][:-1]
-    ll+=[None]
-
+    ''' embedding of time series '''
+    if X[0][0].shape[1] == 1:
+        assert ll is not None or at == True, "must add one dimension to the time-series, via ll=[0] or at=True"
+    if ll is not None:
+        X = LeadLag(ll).fit_transform(X)
+    if at:
+        X = AddTime().fit_transform(X)
+    X = np.array(X)
 
     if mode == 'krr':
 
-        parameters = [{'clf__kernel': ['rbf'],
-                           'clf__gamma': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
-                           'clf__alpha': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
-                           'lead_lag_transform__dimensions_to_lag': ll,
-                           'add_time_transform':[None,AddTime()],
-                           'std_scaler': [None,StandardScaler()],
-                           'expected_signature_transform__order': [2,3,4,5,6,7,8]}
-                           ]
+        # default grid
+        parameters = {'clf__kernel': ['rbf'],
+                      'clf__gamma': [gamma(1e-3), gamma(1e-2), gamma(1e-1), gamma(1), gamma(1e1), gamma(1e2),
+                                     gamma(1e-3)],
+                      'clf__alpha': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
+                      'expected_signature_transform__order': [2, 3]}
+
+        # check if the user has not given an irrelevant entry
+        assert len(list(set(parameters.keys()) & set(grid.keys()))) == len(
+            list(grid.keys())), "keys should be in " + ' '.join([str(e) for e in parameters.keys()])
+
+        # merge the user grid with the default one
+        parameters.update(grid)
+        print(parameters)
 
         clf = KernelRidge
-       
-    else:     
 
+    else:
+
+        # default grid
         parameters = [{'clf__kernel': ['rbf'],
-                       'clf__gamma': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
+                       'clf__gamma': [gamma(1e-2), gamma(1e-1), gamma(1), gamma(1e1), gamma(1e2)],
                        'clf__C': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
-                       'lead_lag_transform__dimensions_to_lag': ll,
-                       'add_time_transform':[None,AddTime()],
-                       'expected_signature_transform__order': [2,3,4,5,6,7,8],
-                       'std_scaler': [None,StandardScaler()]
+                       'expected_signature_transform__order': [2, 3]
                        }]
 
+        # check if the user has not given an irrelevant entry
+        assert list(set(parameters.keys()) & set(grid.keys())) == list(grid.keys()), "keys should be in " + ' '.join(
+            [str(e) for e in parameters.keys()])
+
+        # merge the user grid with the default one
+        parameters.update(grid)
         clf = SVR
 
     # building the estimator
 
-    pipe = Pipeline([('lead_lag_transform', LeadLag(dimensions_to_lag=[0])),
-                     ('add_time_transform', AddTime()),
-                     ('expected_signature_transform', ExpectedSignatureTransform(order=2)),
-                     ('std_scaler', StandardScaler()),
-                     ('clf', clf())
-                     ])
-      
+    pipe = Pipeline(memory='./',steps=[('expected_signature_transform', ExpectedSignatureTransform(order=2)),
+                     ('clf', clf())])
+
     scores = np.zeros(NUM_TRIALS)
-    
+
     # Loop for each trial
     for i in tqdm(range(NUM_TRIALS)):
-
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=i)
         # parameter search
-        model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv, error_score=np.nan)
+        model = GridSearchCV(pipe, parameters, verbose=1, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv,
+                             error_score=np.nan)
         model.fit(X_train, y_train)
         print(model.best_params_)
         y_pred = model.predict(X_test)
-        
+
         scores[i] = mean_squared_error(y_pred, y_test)
-            
+
     return scores.mean(), scores.std()
 
 
-def powerset(seq):
-    """
-    Returns all the subsets of this set. This is a generator.
-    """
-    if len(seq) <= 1:
-        yield seq
-        yield []
-    else:
-        for item in powerset(seq[1:]):
-            yield [seq[0]]+item
-            yield item
+def gamma(l):
+    '''
+        The rbf kernel from sklearn is parametrized by gamma:
+                k_rbf(x,x')=exp(-gamma||x-x'||^2)
+        For our implementation of RBF-RBF we used another parametrization
+                k_rbf(x,x')=exp(-(1/2(l^2))||x-x'||^2)
+        This function transforms ell into gamma.
+        gamma = 1/(2l^2)
+    '''
+    return l
+    #return 1. / (2 * l ** 2)
 
 # The ESig_RBF kernel
 # class ESig_RBF_Kernel(BaseEstimator, TransformerMixin):

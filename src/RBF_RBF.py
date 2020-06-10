@@ -61,14 +61,28 @@ def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5,  cv=3):
         parameters = [{'clf__kernel': ['precomputed'], 'clf__alpha':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
                        'rbf_rbf__gamma_emb':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
                        'rbf_rbf__gamma_top':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}]
-        
+
+        # check if the user has not given an irrelevant entry
+        assert list(set(parameters.keys()) & set(grid.keys())) == list(grid.keys()), "keys should be in " + ' '.join(
+            [str(e) for e in parameters.keys()])
+
+        # merge the user grid with the default one
+        parameters.update(grid)
+
         clf = KernelRidge
        
     else:     
         parameters = [{'clf__kernel': ['precomputed'], 'clf__C':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
                        'rbf_rbf__gamma_emb':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1./(common_T*dim_path)],
                        'rbf_rbf__gamma_top':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1./(common_T*dim_path)]}]
-        
+
+        # check if the user has not given an irrelevant entry
+        assert list(set(parameters.keys()) & set(grid.keys())) == list(grid.keys()), "keys should be in " + ' '.join(
+            [str(e) for e in parameters.keys()])
+
+        # merge the user grid with the default one
+        parameters.update(grid)
+
         clf = SVR
 
     # building RBF-RBF estimator
