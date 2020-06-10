@@ -3,7 +3,7 @@ Code to perform distribution regression (DR) on time-series via two models (kerE
 
 ## Structure of the repository
 
-- The `src` folder contains the implementation of kerES and linSES for DR on time-series , as well as an implementation of Support Distribution Machines (SDM) using RBF kernels (RBF-RBF) [[1]](#1) for DR on vectorial data. 
+- The `src` folder contains the implementation of kerES and linSES for DR on time-series , as well as an implementation of Support Distribution Machines (SDM) using RBF kernels [[1]](#1) for DR on vectorial data. 
 - The `examples` folder contains notebooks to reproduce the experiments of the paper. 
 - The `data` folder contains precomputed datasets for the experiments. 
 
