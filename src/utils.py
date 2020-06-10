@@ -77,13 +77,13 @@ def bags_to_2D(input_):
     (represented as a list of list of (T,D) matrices, where T is the length of the time series) into a 2D array to be
     compatible with what sklearn pipeline takes in input, i.e. a 2D array (n_samples, n_features). 
     
-    It relies (1) padding each time series with its last value such that all time series have the same length.
+    (1) Pad each time series with its last value such that all time series have the same length.
     -> This yields lists of lists of 2D arrays (max_length,dim)
-    (2) stacking the dimensions of the time series for each item
+    (2) Stack the dimensions of the time series for each item
     -> This yields lists of lists of 1D arrays (max_length*dim)
-    (3) stacking the items in a bag
+    (3) Stack the items in a bag
     -> This yields lists of 1D arrays (n_item*max_length*dim)
-    (4) creating "dummy items" which are time series of NaNs, such that they can be retrieved and removed at inference time
+    (4) Create "dummy items" which are time series of NaNs, such that they can be retrieved and removed at inference time
     -> This yields a 2D array (n_bags,n_max_items*max_length*dim)
 
        Input:

@@ -4,7 +4,8 @@ from tqdm import tqdm as tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-from utils import AddTime, LeadLag, bags_to_2D
+from utils import bags_to_2D
+from sklearn_transformers import LeadLag, AddTime
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -15,11 +16,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-
-def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5,  cv=3):
-    
-    """Performs a RBF-RBF Kenrel based distribution regression on ensembles (of possibly unequal size)
-       of univariate or multivariate time-series equal of unequal lengths
+def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, grid={}):
+    """Performs a RBF-RBF kernel-based distribution regression on ensembles (of possibly unequal cardinality)
+       of univariate or multivariate time-series. 
 
        Input:
               X (list): list of lists such that
@@ -31,53 +30,50 @@ def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5,  cv=3):
                         - for any j, X[i][j] is an array of shape (length, dim)
 
               y (np.array): array of shape (n_samples,)
-              
+
               ll (list of ints): dimensions to lag
               at (bool): if True pre-process the input path with add-time
-              ss (bool): if True StandardScale the ESignature features
-                                
+
               mode (str): "krr" -> Kernel Ridge Regression, 'svr' -> Support Vector Regresion
-              
+
               NUM_TRIALS, cv : parameters for nested cross-validation
-              
-       Output: mean MSE (and std) (both scalars) of regression performance on a 5-fold (or custom spatial) cross-validation
+
+       Output: mean MSE (and std) (both scalars) of regression performance on a cv-folds cross-validation (NUM_TRIALS times)
     """
-    
+
     assert mode in ['svr', 'krr'], "mode must be either 'svr' or 'krr' "
     
-    X_new = []
-    for bag in X:
-        if ll is not None:
-            bag = LeadLag(ll).fit_transform(bag)
-        if at:
-            bag = AddTime().fit_transform(bag)
-        X_new.append(bag)
-    X = X_new
-    
+    # possibly augment the state space of the time series
+    if ll is not None:
+        X = LeadLag(ll).fit_transform(X)
+    if at:
+        X = AddTime().fit_transform(X)
+    X = np.array(X)
+
     # transforming the data into a 2d array (N_bags, N_items_max x length_min x dim)
     X, max_items, common_T, dim_path = bags_to_2D(X)
 
     if mode == 'krr':
-        parameters = [{'clf__kernel': ['precomputed'], 'clf__alpha':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
-                       'rbf_rbf__gamma_emb':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
-                       'rbf_rbf__gamma_top':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}]
+        parameters = {'clf__kernel': ['precomputed'], 'clf__alpha': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
+                      'rbf_rbf__gamma_emb': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
+                      'rbf_rbf__gamma_top': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3]}
 
         # check if the user has not given an irrelevant entry
-        assert list(set(parameters.keys()) & set(grid.keys())) == list(grid.keys()), "keys should be in " + ' '.join(
-            [str(e) for e in parameters.keys()])
-
+        assert len(list(set(parameters.keys()) & set(grid.keys()))) == len(
+            list(grid.keys())), "keys should be in " + ' '.join([str(e) for e in parameters.keys()])
         # merge the user grid with the default one
         parameters.update(grid)
 
         clf = KernelRidge
-       
-    else:     
-        parameters = [{'clf__kernel': ['precomputed'], 'clf__C':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
-                       'rbf_rbf__gamma_emb':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1./(common_T*dim_path)],
-                       'rbf_rbf__gamma_top':[1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1./(common_T*dim_path)]}]
+
+    else:
+        parameters = {'clf__kernel': ['precomputed'], 'clf__C': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3],
+                      'rbf_rbf__gamma_emb': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1. / (common_T * dim_path)],
+                      'rbf_rbf__gamma_top': [1e-3, 1e-2, 1e-1, 1, 1e1, 1e2, 1e3, 1. / (common_T * dim_path)]}
 
         # check if the user has not given an irrelevant entry
-        assert list(set(parameters.keys()) & set(grid.keys())) == list(grid.keys()), "keys should be in " + ' '.join(
+        assert len(list(set(parameters.keys()) & set(grid.keys()))) == len(
+            list(grid.keys())), "keys should be in " + ' '.join(
             [str(e) for e in parameters.keys()])
 
         # merge the user grid with the default one
@@ -85,29 +81,27 @@ def model(X, y, ll=None, at=False, mode='krr', NUM_TRIALS=5,  cv=3):
 
         clf = SVR
 
-    # building RBF-RBF estimator
-    pipe = Pipeline([('rbf_rbf', RBF_RBF_Kernel(max_items = max_items, size_item=dim_path*common_T)),
+    # building the RBF-RBF estimator
+    pipe = Pipeline([('rbf_rbf', RBF_RBF_Kernel(max_items=max_items, size_item=dim_path * common_T)),
                      ('clf', clf())])
-          
-    scores = np.zeros(NUM_TRIALS)
-    
-    # Loop for each trial
-    for i in tqdm(range(NUM_TRIALS)):
 
+    # Loop for each trial
+    scores = np.zeros(NUM_TRIALS)
+    for i in tqdm(range(NUM_TRIALS)):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=i)
 
         # parameter search
         model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv)
         model.fit(X_train, y_train)
-        
+
         y_pred = model.predict(X_test)
-        
+
         scores[i] = mean_squared_error(y_pred, y_test)
-            
+
     return scores.mean(), scores.std()
 
 
-# The RBF-RBF kernel
+
 class RBF_RBF_Kernel(BaseEstimator, TransformerMixin):
     def __init__(self, max_items=None, size_item=None, gamma_emb=1.0, gamma_top=1.0):
         super(RBF_RBF_Kernel, self).__init__()
@@ -117,7 +111,6 @@ class RBF_RBF_Kernel(BaseEstimator, TransformerMixin):
         self.max_items = max_items
 
     def transform(self, X):
-
         alpha = 1. / (2 * self.gamma_top ** 2)
         x = X.reshape(-1, self.size_item)
         K = rbf_mmd_mat(x, self.x_train, gamma=self.gamma_emb, max_items=self.max_items)

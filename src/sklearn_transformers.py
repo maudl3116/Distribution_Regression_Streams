@@ -142,3 +142,7 @@ class SignatureTransform(BaseEstimator, TransformerMixin):
             return iisignature.sig(X, self.order)
         else:
             return [iisignature.sig(item, self.order) for item in X]
+
+
+if __name__ == "__main__":
+    doctest.testmod()

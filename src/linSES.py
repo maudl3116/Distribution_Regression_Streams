@@ -2,7 +2,6 @@ import numpy as np
 from tqdm import tqdm as tqdm
 
 import warnings
-
 warnings.filterwarnings('ignore')
 
 import iisignature
@@ -17,12 +16,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-def model(X, y, NUM_TRIALS=5, cv=3,grid={}):
-    """Performs a SigESig(depth)-Linear distribution regression on ensembles (of possibly unequal size)
-       of univariate or multivariate time-series equal of unequal lengths
+def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
+    """Performs a Lasso-based distribution regression on ensembles (of possibly unequal cardinality)
+       of univariate or multivariate time-series (of possibly unequal lengths)
 
-       Input: depth1 (int): truncation of the signature 1
-              depth2 (int): truncation of the signature 2
+       Input: depths1 (list of ints): truncation of the signature 1 (is cross-validated)
+              depth2 (int): truncation of the second signature
 
               X (list): list of lists such that
 
@@ -34,73 +33,78 @@ def model(X, y, NUM_TRIALS=5, cv=3,grid={}):
 
               y (np.array): array of shape (n_samples,)
 
+              ll (list of ints): dimensions to lag
+              at (bool): if True pre-process the input path with add-time
+
               NUM_TRIALS, cv (int): parameters for nested cross-validation
 
               grid (dict): a dictionary to specify the hyperparameter grid for the gridsearch. Unspecified entries will be set by default
 
-       Output: mean MSE (and std) (both scalars) of regression performance on a NUM_TRIALS-fold cross-validation
+       Output: mean MSE (and std) (both scalars) of regression performance on a cv-folds cross-validation (NUM_TRIALS times)
 
     """
-
-    ll = [x for x in powerset(list(np.arange(X[0][0].shape[1])))][:-1]
-    ll += [None]
-    print(ll)
-    ll = [None, [0, 1, 2]]
+    
+    if X[0][0].shape[1] == 1:
+        assert ll is not None or at == True, "must add one dimension to the time-series, via ll=[0] or at=True"
+        
+    # possibly augment the state space of the time series
+    if ll is not None:
+        X = LeadLag(ll).fit_transform(X)
+    if at:
+        X = AddTime().fit_transform(X)
+    X = np.array(X)
 
     # parameters for grid search
-    parameters = [{'lin_reg__alpha': [1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6],
-                   'lin_reg__fit_intercept': [True, False],
-                   'lin_reg__normalize': [True, False],
-                   'lead_lag_transform__dimensions_to_lag': ll,
-                   'add_time_transform': [None, AddTime()],
-                   'pathwise_expected_signature_transform__order': [2],
-                   'std_scaler': [None, StandardScaler()],
-                   'signature_transform__order': [2]
-                   }]
+    parameters = {'lin_reg__alpha': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5],
+                  'lin_reg__fit_intercept': [False, True],
+                  'lin_reg__normalize': [True, False],
+                  }
 
     # check if the user has not given an irrelevant entry
-    assert list(set(parameters.keys()) & set(grid.keys())) == list(grid.keys()), "keys should be in " + ' '.join(
-        [str(e) for e in parameters.keys()])
+    assert len(list(set(parameters.keys()) & set(grid.keys()))) == len(
+        list(grid.keys())), "keys should be in " + ' '.join([str(e) for e in parameters.keys()])
 
     # merge the user grid with the default one
     parameters.update(grid)
 
-    # building pathwise-Esig estimator
-
-    pipe = Pipeline([('lead_lag_transform', LeadLag(dimensions_to_lag=[0])),
-                     ('add_time_transform', AddTime()),
-                     ('pathwise_expected_signature_transform', pathwiseExpectedSignatureTransform(order=2)),
-                     ('signature_transform', SignatureTransform(order=2)),
-                     ('std_scaler', StandardScaler()),
-                     ('lin_reg', Lasso(max_iter=1000))])
+    pipe = Pipeline([('lin_reg', Lasso(max_iter=1000))])
 
     scores = np.zeros(NUM_TRIALS)
 
     # Loop for each trial
     for i in tqdm(range(NUM_TRIALS)):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=i)
 
-        # parameter search
-        model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv,
-                             error_score=np.nan)
-        model.fit(X_train, y_train)
-        print(model.best_params_)
-        y_pred = model.predict(X_test)
+        best_scores_train = np.zeros(len(depths1))
 
-        scores[i] = mean_squared_error(y_pred, y_test)
+        # will only retain the MSE (mean + std) corresponding to the model achieving the best score on the train set
+        # i.e. the test set is not used to decide the truncation level.
+        MSE_test = np.zeros(len(depths1))
 
+        for n, depth in enumerate(depths1):
+            pwES = pathwiseExpectedSignatureTransform(order=depth).fit_transform(X)
+            SpwES = SignatureTransform(order=depth2).fit_transform(pwES)
+
+            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.2,
+                                                                random_state=i)
+
+            # parameter search
+            model = GridSearchCV(pipe, parameters, verbose=0, n_jobs=-1, scoring='neg_mean_squared_error', cv=cv,
+                                 error_score=np.nan)
+
+            model.fit(X_train, y_train)
+            best_scores_train[n] = -model.best_score_
+
+            y_pred = model.predict(X_test)
+            MSE_test[n] = mean_squared_error(y_pred, y_test)
+
+        # pick the model with the best performances on the train set
+        best_score = 100000
+        index = None
+        for n, depth in enumerate(depths1):
+            if (best_scores_train[n] < best_score):
+                best_score = best_scores_train[n]
+                index = n
+
+        scores[i] = MSE_test[index]
+        print('best truncation level (cv on train set): ', depths1[index])
     return scores.mean(), scores.std()
-
-
-def powerset(seq):
-    """
-    Returns all the subsets of this set. This is a generator.
-    """
-    if len(seq) <= 1:
-        yield seq
-        yield []
-    else:
-        for item in powerset(seq[1:]):
-            yield [seq[0]] + item
-            yield item
-
