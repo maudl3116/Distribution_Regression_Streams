@@ -1,5 +1,9 @@
 # Distribution Regression for Continuous-Time Processes
+Code to perform distribution regression on time-series via two models (kerES and linSES) based on the Expected Signature.
 
+## Structure of the repository
+
+- The `src` folder
 
 ## Acknowledgments
 
