@@ -1,4 +1,4 @@
-# Distribution Regression for Continuous-Time Processes via the Expected Signature
+# Distribution Regression for Continuous-Time Processes
 
 
 ## Acknowledgments
