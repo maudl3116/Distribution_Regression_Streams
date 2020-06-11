@@ -4,16 +4,11 @@ from tqdm import tqdm as tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-import iisignature
-from utils import AddTime, LeadLag
-
-from sklearn.preprocessing import StandardScaler
 from sklearn_transformers import AddTime, LeadLag, pathwiseExpectedSignatureTransform, SignatureTransform
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.pipeline import Pipeline
-from sklearn.base import BaseEstimator, TransformerMixin
 
 
 def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
