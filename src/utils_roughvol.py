@@ -5,6 +5,7 @@ import numpy as np
 from fbm import FBM
 
 def fOU_generator(a,n=0.3,h=0.2,length=300):
+    
     fbm_increments = np.diff(FBM(length, h).fbm())
     # X(t+1) = X(t) - a(X(t)-m) + n(W(t+1)-W(t))
     x0 = np.random.normal(1,0.1)

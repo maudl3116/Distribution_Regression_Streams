@@ -65,7 +65,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
     pipe = Pipeline([('lin_reg', Lasso(max_iter=1000))])
 
     scores = np.zeros(NUM_TRIALS)
-
+    results = {}
     # Loop for each trial
     for i in tqdm(range(NUM_TRIALS)):
 
@@ -74,7 +74,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
         # will only retain the MSE (mean + std) corresponding to the model achieving the best score on the train set
         # i.e. the test set is not used to decide the truncation level.
         MSE_test = np.zeros(len(depths1))
-
+        results_tmp = {}
         for n, depth in enumerate(depths1):
             pwES = pathwiseExpectedSignatureTransform(order=depth).fit_transform(X)
             SpwES = SignatureTransform(order=depth2).fit_transform(pwES)
@@ -90,6 +90,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
             best_scores_train[n] = -model.best_score_
 
             y_pred = model.predict(X_test)
+            results_tmp[n]={'pred':y_pred,'true':y_test}
             MSE_test[n] = mean_squared_error(y_pred, y_test)
 
         # pick the model with the best performances on the train set
@@ -101,5 +102,6 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
                 index = n
 
         scores[i] = MSE_test[index]
+        results[i] = results_tmp[index]
         print('best truncation level (cv on train set): ', depths1[index])
-    return scores.mean(), scores.std()
+    return scores.mean(), scores.std(), results

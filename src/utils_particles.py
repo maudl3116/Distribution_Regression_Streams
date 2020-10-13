@@ -51,7 +51,7 @@ class Sim():
                     iteration the volume will be update over time.
             ::max_time:: maximum animation time
         """
-
+        np.random.seed(0)
         self.PART = n_particles
         self.MASS = mass
         self.RAD = rad

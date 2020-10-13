@@ -113,15 +113,18 @@ class pathwiseExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+        pwES = []
+        for bag in X:
+            # get the lengths of all time series in the bag
+            lengths = [item.shape[0] for item in bag]
+            if len(list(set(lengths))) == 1:
+                # if all time series have the same length, the (pathwise) signatures can be computed in batch
+                pwES.append(iisignature.sig(bag, self.order, 2))
+            else:
+                error_message = 'All time series in a bag must have the same length'
+                raise NameError(error_message)
 
-        # get the lengths of all time series (across items across bags)
-        lengths = [item.shape[0] for bag in X for item in bag]
-        if len(list(set(lengths))) == 1:
-            # if all time series have the same length, the (pathwise) signatures can be computed in batch
-            X = [iisignature.sig(bag, self.order, 2) for bag in X]
-        else:
-            X = [np.array([iisignature.sig(item, self.order, 2) for item in bag]) for bag in X]
-        return [x.mean(0) for x in X]
+        return [x.mean(0) for x in pwES]
 
 
 class SignatureTransform(BaseEstimator, TransformerMixin):
