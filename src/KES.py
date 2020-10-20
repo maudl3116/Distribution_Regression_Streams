@@ -4,7 +4,7 @@ from tqdm import tqdm as tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-from sklearn_transformers import AddTime, LeadLag, ExpectedSignatureTransform
+from sklearn_transformers import AddTime, LeadLag
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, train_test_split
@@ -13,7 +13,7 @@ from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
-from sigKer_fast import sig_kernels_f_mmd_2
+from sigKer_fast import sig_kernel_mmd
 
 from joblib import Parallel, delayed
 
@@ -32,7 +32,7 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
 
               y (np.array): array of shape (n_samples,)
 
-              depths (list of ints): signature levels to cross-validate
+              scales (list of floats): time-series scaling parameter to cross-validate
               ll (list of ints): dimensions to lag (set to None by default)
               at (bool): if True pre-process the input path with add-time
 
@@ -42,7 +42,7 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
 
               grid (dict): a dictionary to specify the hyperparameter grid for the gridsearch. Unspecified entries will be set by default
 
-       Output: mean MSE (and std) (both scalars) of regression performance on a cv-folds cross-validation (NUM_TRIALS times)
+       Output: mean MSE (and std) (both scalars) of regression performance on a cv-folds cross-validation (NUM_TRIALS times) as well results (a dictionary containing the predicted labels and true labels)
     """
 
     assert mode in ['svr', 'krr'], "mode must be either 'svr' or 'krr' "
@@ -55,7 +55,7 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
         X = LeadLag(ll).fit_transform(X)
     if at:
         X = AddTime().fit_transform(X)
-    print(X[0][0].shape)
+    
     if mode == 'krr':
 
         # default grid
@@ -90,6 +90,7 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
 
     list_kernels = []
 
+    # Precompute the Gram matrices for the different scaling parameters, to avoid recomputing them for each grid search step
     for scale in tqdm(scales):
         K_full = np.zeros((len(X), len(X)),dtype=np.float64)
         indices = np.triu_indices(len(X),k=0,m=len(X))
@@ -100,22 +101,22 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
         ) 
         indices = np.tril_indices(len(X), k=-1, m=len(X))
         K_full[indices] = K_full.T[indices]
+        
         diag = np.diag(K_full)
-
         mmd = -2. * K_full + np.tile(diag,(K_full.shape[0],1)) + np.tile(diag[:,None],(1,K_full.shape[0]))
         list_kernels.append(mmd)
 
-    # Loop for each trial
+    
     scores = np.zeros(NUM_TRIALS)
     results = {}
+    # Loop for each trial
     for i in tqdm(range(NUM_TRIALS)):
 
         best_scores_train = np.zeros(len(scales))
 
         # will only retain the MSE (mean + std) corresponding to the model achieving the best score (on the train set)
-        # i.e. the test set is not used to decide the truncation level.
-        # the truncation level cannot be placed in a pipeline otherwise the signatures are recomputed even when not needed
-
+        # i.e. the test set is not used to decide the hyperparameters.
+   
         MSE_test = np.zeros(len(scales))
         results_tmp = {}
         for n, scale in enumerate(scales):
@@ -142,14 +143,14 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
         # pick the model with the best performances on the train set
         best_score = 100000
         index = None
-        for n, depth in enumerate(scales):
+        for n, scale in enumerate(scales):
             if (best_scores_train[n] < best_score):
                 best_score = best_scores_train[n]
                 index = n
 
         scores[i] = MSE_test[index]
         results[i] = results_tmp[index]
-        print('best truncation level (cv on the train set): ', scales[index])
+        print('best scaling parameter (cv on the train set): ', scales[index])
     print('scores',scores)
     return scores.mean(), scores.std(), results
 
@@ -162,10 +163,9 @@ class RBF_Sig_MMD_Kernel(BaseEstimator, TransformerMixin):
 
 
     def transform(self, X):
-        #print('transform', X.shape)
         alpha = 1. / (2 * self.gamma ** 2)
         K = self.K_full[X][:,self.ind_train].copy()
-        return np.exp(-alpha*K)  # #alpha*X #
+        return np.exp(-alpha*K) 
 
     def fit(self, X, y=None, **fit_params):
         self.ind_train = X
@@ -174,5 +174,6 @@ class RBF_Sig_MMD_Kernel(BaseEstimator, TransformerMixin):
 def ExpectedKernel(X_i,X_j,sym,scale,n=0):
     tree_i = np.array([scale*branch for branch in X_i],dtype=np.float64)
     tree_j = np.array([scale*branch for branch in X_j],dtype=np.float64)
-    K_ij = sig_kernels_f_mmd_2(tree_i,tree_j,sym=False,n=n)
+    K_ij = sig_kernel_mmd(tree_i,tree_j,sym=False,n=n) # increasing n corresponds to increasing the number of steps
+    # taken by the PDE solver (forward finite-difference scheme)
     return np.mean(K_ij[:,:,-1,-1])  

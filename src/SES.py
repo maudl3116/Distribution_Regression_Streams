@@ -47,7 +47,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
         X = LeadLag(ll).fit_transform(X)
     if at:
         X = AddTime().fit_transform(X)
-    X = np.array(X)
+  
 
     # parameters for grid search
     parameters = {'lin_reg__alpha': [1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5],
