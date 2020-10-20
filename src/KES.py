@@ -13,7 +13,7 @@ from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
-from sigKer_fast import sig_kernel_mmd
+from sigKer_fast import sig_kernels_mmd
 
 from joblib import Parallel, delayed
 
@@ -174,6 +174,6 @@ class RBF_Sig_MMD_Kernel(BaseEstimator, TransformerMixin):
 def ExpectedKernel(X_i,X_j,sym,scale,n=0):
     tree_i = np.array([scale*branch for branch in X_i],dtype=np.float64)
     tree_j = np.array([scale*branch for branch in X_j],dtype=np.float64)
-    K_ij = sig_kernel_mmd(tree_i,tree_j,sym=False,n=n) # increasing n corresponds to increasing the number of steps
+    K_ij = sig_kernels_mmd(tree_i,tree_j,sym=False,n=n) # increasing n corresponds to increasing the number of steps
     # taken by the PDE solver (forward finite-difference scheme)
     return np.mean(K_ij[:,:,-1,-1])  
