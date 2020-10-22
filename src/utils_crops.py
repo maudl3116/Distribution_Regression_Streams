@@ -2,7 +2,7 @@ from sklearn.cluster import KMeans
 import numpy as np
 import pickle
 from esig import tosig as esig
-
+from sklearn_transformers import AddTime
 
 def get_sig_keys(dico,sig_level):
     
@@ -23,7 +23,7 @@ def get_sig_keys(dico,sig_level):
 
     return features_names
 
-def subsample(input_,p):
+def subsample(input_,p,N_items,time=False):
     '''
     
     This function applies random subsampling of bags of items of D-dimensional time-series. All dimensions of the time-series 
@@ -44,15 +44,21 @@ def subsample(input_,p):
     '''
     
     assert p>=0 and p<1
-    
+    mini = int(np.min([len(x[0]) for x in input_]))
     new_input_ = []
-    
+    np.random.seed(0)
+    if time:
+        input_ = AddTime().fit_transform(input_)
     for i in range(len(input_)): # loop through bags
         new_bag = []
-        for j in range(len(input_[i])): # loop through items
+        if len(input_[i])>N_items:
+            items = np.sort(np.random.choice(len(input_[i]),N_items,replace=False))
+        else:
+            items = np.arange(len(input_[i]))
+        for j in items: # loop through items
             L = len(input_[i][j])
             # Number of observations to select
-            N = (1.-p)*L
+            N = (1.-p)*mini
             time_stamps_kept = np.sort(np.random.choice(np.arange(L),round(N),replace=False))
             new_bag.append(input_[i][j][time_stamps_kept,:])
         new_input_.append(new_bag)

@@ -135,3 +135,22 @@ def bags_to_2D(input_):
     X = np.array(items_naned)
 
     return X, max_items, common_T, dim_path
+
+
+def mse(results):
+    mse_vec = np.zeros(len(results))
+ 
+    for i in range(len(results)):
+        pred = results[i]['pred']
+        true = results[i]['true']
+        mse_vec[i]=np.mean((pred-true)**2)
+    return np.mean(mse_vec), np.std(mse_vec)
+
+def mape(results):
+    mape_vec = np.zeros(len(results))
+ 
+    for i in range(len(results)):
+        pred = results[i]['pred']
+        true = results[i]['true']
+        mape_vec[i]=np.mean(np.abs((true - pred) / true))*100 
+    return np.mean(mape_vec), np.std(mape_vec)
