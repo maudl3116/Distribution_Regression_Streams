@@ -112,8 +112,8 @@ class Trainer(object):
             if j%50==0:
                 print('Train loss: {0:.6f}'.format(loss.data.cpu().numpy()))
               
-        plt.plot(losses[50:])
-        plt.show()   
+        #plt.plot(losses[50:])
+        #plt.show()   
     def evaluate(self, test, return_all=False):
         counts = 0
         sum_mae = 0.

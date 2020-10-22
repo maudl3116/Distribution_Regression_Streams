@@ -151,7 +151,7 @@ def model(X, y, scales=[1], ll=None, at=False, mode='krr', NUM_TRIALS=5, cv=3, g
         scores[i] = MSE_test[index]
         results[i] = results_tmp[index]
         print('best scaling parameter (cv on the train set): ', scales[index])
-    print('scores',scores)
+    
     return scores.mean(), scores.std(), results
 
 
