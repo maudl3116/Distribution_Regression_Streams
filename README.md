@@ -2,10 +2,7 @@
 Code to perform distribution regression (DR) on time-series via two models (KES and SES) based on the Expected Signature.
 [Link to the paper](https://arxiv.org/pdf/2006.05805.pdf)
 
-
-[![IMAGE ALT TEXT HERE]](https://media.giphy.com/media/OoI2FOlFppTXGoCyaH/giphy.gif)
-
-<iframe src="https://giphy.com/embed/OoI2FOlFppTXGoCyaH" width="480" height="150" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/OoI2FOlFppTXGoCyaH">via GIPHY</a></p>
+![Alt Text](https://media.giphy.com/media/OoI2FOlFppTXGoCyaH/giphy.gif)
 
 ## Structure of the repository
 
