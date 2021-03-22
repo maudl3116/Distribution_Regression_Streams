@@ -2,7 +2,10 @@
 Code to perform distribution regression (DR) on time-series via two models (KES and SES) based on the Expected Signature.
 [Link to the paper](https://arxiv.org/pdf/2006.05805.pdf)
 
-![An example in thermodynamics](https://github.com/maudl3116/Distribution_Regression_Streams/tree/master/pictures/particles.mp4)
+
+[![IMAGE ALT TEXT HERE]](https://giphy.com/gifs/OoI2FOlFppTXGoCyaH)
+
+<iframe src="https://giphy.com/embed/OoI2FOlFppTXGoCyaH" width="480" height="150" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/OoI2FOlFppTXGoCyaH">via GIPHY</a></p>
 
 ## Structure of the repository
 
