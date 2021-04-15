@@ -4,7 +4,7 @@ Code to perform distribution regression (DR) on time-series via two models (KES 
 
 ![Simulation of the trajectories traced by the particles of an ideal gas in a 3-d box under different
 thermodynamic conditions. Higher temperatures equate to a higher internal energy in the system which increases
-the number of collisions resulting in different large-scale dynamics of the gas.](https://user-images.githubusercontent.com/26120929/114845026-48cd3380-9dd3-11eb-81c0-2e315a4c7aab.gif)
+the number of collisions resulting in different large-scale dynamics of the gas.](https://user-images.githubusercontent.com/26120929/114847969-28eb3f00-9dd6-11eb-99a9-34f584ca3b48.gif)
 
 ## Structure of the repository
 
