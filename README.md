@@ -2,6 +2,8 @@
 Code to perform distribution regression (DR) on time-series via two models (KES and SES) based on the Expected Signature.
 [Link to the paper](https://arxiv.org/pdf/2006.05805.pdf)
 
+![Demo](https://user-images.githubusercontent.com/26120929/114841860-34d40280-9dd0-11eb-9ed0-82cebfd7768f.mp4)
+
 ## Structure of the repository
 
 - The `src` folder contains the implementation of KES and SES for DR on time-series , as well as an implementation of Support Distribution Machines (SDM) using RBF and Matern32 kernels [[1]](#1) for DR on vectorial data. It also includes an implementation of SDM using the GA kernel [[2]](#2) for time-series.
