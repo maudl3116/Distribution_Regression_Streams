@@ -1,10 +1,12 @@
 # Distribution Regression for Sequential Data
-Code to perform distribution regression (DR) on time-series via two models (KES and SES) based on the Expected Signature.
-[Link to the paper](https://arxiv.org/pdf/2006.05805.pdf)
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/26120929/114847969-28eb3f00-9dd6-11eb-99a9-34f584ca3b48.gif">
 </p>
+
+Code to perform distribution regression (DR) on time-series via KES (kernel-based) or SES (feature-based), two models based on the Expected Signature.
+[Link to the paper](http://proceedings.mlr.press/v130/lemercier21a/lemercier21a.pdf)
+
 
 ## Structure of the repository
 
@@ -35,4 +37,17 @@ Cuturi, Marco, et al. "A kernel for time series based on global alignments." IEE
 
 <a id="3">[3]</a> 
 Zaheer, Manzil, et al. "Deep sets." Advances in neural information processing systems. 2017.
+
+## Citation
+
+```
+@inproceedings{lemercier2021distribution,
+  title={Distribution Regression for Sequential Data},
+  author={Lemercier, Maud and Salvi, Cristopher and Damoulas, Theodoros and Bonilla, Edwin and Lyons, Terry},
+  booktitle={International Conference on Artificial Intelligence and Statistics},
+  pages={3754--3762},
+  year={2021},
+  organization={PMLR}
+}
+```
 
