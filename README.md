@@ -2,9 +2,10 @@
 Code to perform distribution regression (DR) on time-series via two models (KES and SES) based on the Expected Signature.
 [Link to the paper](https://arxiv.org/pdf/2006.05805.pdf)
 
-![Simulation of the trajectories traced by the particles of an ideal gas in a 3-d box under different
+![](https://user-images.githubusercontent.com/26120929/114847969-28eb3f00-9dd6-11eb-99a9-34f584ca3b48.gif)
+*Simulation of the trajectories traced by the particles of an ideal gas in a 3-d box under different
 thermodynamic conditions. Higher temperatures equate to a higher internal energy in the system which increases
-the number of collisions resulting in different large-scale dynamics of the gas.](https://user-images.githubusercontent.com/26120929/114847969-28eb3f00-9dd6-11eb-99a9-34f584ca3b48.gif)
+the number of collisions resulting in different large-scale dynamics of the gas.*
 
 ## Structure of the repository
 
