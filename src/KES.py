@@ -84,7 +84,7 @@ def model(X, y, alphas=[0.5], rbf=True, dyadic_order=1, ll=None, at=False, mode=
         mmd = np.zeros((len(X),len(X)))
 
         if rbf:
-            static_kernel = sigkernel.RBFKernel(sigma=scale,add_time=X[0][0].shape[0]-1)
+            static_kernel = sigkernel.RBFKernel(sigma=alpha,add_time=X[0][0].shape[0]-1)
         else:
             static_kernel = sigkernel.LinearKernel(add_time=X[0][0].shape[0]-1)
 
