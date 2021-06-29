@@ -4,6 +4,7 @@ import random
 import doctest
 import iisignature
 import warnings
+import torch
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -134,30 +135,40 @@ class pathwiseSketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
             raise NameError('The order must be a positive integer.')
         self.order = order
         self.ncompo = ncompo
-        static_kernel = ksig.static.kernels.RBFKernel() 
+        static_kernel = ksig.static.kernels.RBFKernel(lengthscale=10) 
+        # static_kernel = ksig.static.kernels.LinearKernel() 
         static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
         proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
         self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
 
     def fit(self, X, y=None):
-        self.lr_sig_kernel.fit(X)
+
+        self.lr_sig_kernel.fit(np.array(X[0]))
         return self
 
     def transform(self, X, y=None):
         pwES = []
-        for bag in X:
-            # get the lengths of all time series in the bag
-            lengths = [item.shape[0] for item in bag]
-            if len(list(set(lengths))) == 1:
-                # if all time series have the same length, the (pathwise) signatures can be computed in batch
-                feat = [self.lr_sig_kernel.transform(bag[:,:i,:])[:,None,:] for i in range(bag.shape[1])]   # list of (Nx1xD) features 
-                pwES.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
-                print(np.concatenate(feat,axis=1).shape)
-            else:
-                error_message = 'All time series in a bag must have the same length'
-                raise NameError(error_message)
+        # for bag in X:
+        #     # get the lengths of all time series in the bag
+        #     lengths = [item.shape[0] for item in bag]
+        #     if len(list(set(lengths))) == 1:
+        #         # if all time series have the same length, the (pathwise) signatures can be computed in batch
+        #         feat = [self.lr_sig_kernel.transform(np.array(bag)[:,:i,:])[:,None,:] for i in range(2,bag[0].shape[0])]   # list of (Nx1xD) features 
+        #         pwES.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
 
-        return [x.mean(0) for x in pwES]
+        #     else:
+        #         error_message = 'All time series in a bag must have the same length'
+        #         raise NameError(error_message)
+
+        # return np.concatenate([x.mean(0)[None,:,:] for x in pwES])  
+        X = np.array(X)
+        X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
+        feat = [self.lr_sig_kernel.transform(X_[:,:i,:])[:,None,:] for i in range(2,X_.shape[1])] # list of (NMx1xD) features
+        feat = np.concatenate(feat,axis=1) # (NMxLxD)
+        pwES = feat.reshape((X.shape[0],X.shape[1],feat.shape[1],feat.shape[2]))  # (M,N,L,D)
+        pwES = np.concatenate([x.mean(0)[None,:,:] for x in pwES]) 
+        print(pwES.shape)
+        return pwES 
 
 
 class SignatureTransform(BaseEstimator, TransformerMixin):
@@ -187,7 +198,8 @@ class SketchSignatureTransform(BaseEstimator, TransformerMixin):
             raise NameError('The order must be a positive integer.')
         self.order = order
         self.ncompo = ncompo
-        static_kernel = ksig.static.kernels.RBFKernel() 
+        # static_kernel = ksig.static.kernels.RBFKernel() 
+        static_kernel = ksig.static.kernels.LinearKernel() 
         static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
         proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
         self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)

@@ -7,9 +7,9 @@ warnings.filterwarnings('ignore')
 from sklearn_transformers import AddTime, LeadLag, pathwiseExpectedSignatureTransform, SignatureTransform, pathwiseSketchExpectedSignatureTransform, SketchSignatureTransform
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import mean_squared_error
-from sklearn.linear_model import LinearRegression, Lasso
+from sklearn.linear_model import LinearRegression, Lasso, Ridge
 from sklearn.pipeline import Pipeline
-
+import itertools
 import ksig
 
 def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
@@ -80,7 +80,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
             pwES = pathwiseExpectedSignatureTransform(order=depth).fit_transform(X)
             SpwES = SignatureTransform(order=depth2).fit_transform(pwES)
 
-            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.2,
+            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.3,
                                                                 random_state=i)
 
             # parameter search
@@ -109,7 +109,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
 
 
 
-    def model_sketch(X, y, depths1=[2], depths2=[2], ncompo = 100, ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
+def model_sketch(X, y, depths1=[2], depths2=[2], ncompos1 = [100], ncompos2 = [100], ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
     """Performs a Lasso-based distribution regression on ensembles (of possibly unequal cardinality)
        of univariate or multivariate time-series (of possibly unequal lengths)
 
@@ -160,7 +160,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
     # merge the user grid with the default one
     parameters.update(grid)
 
-    pipe = Pipeline([('lin_reg', Lasso(max_iter=1000))])
+    pipe = Pipeline([('lin_reg', Ridge())])
 
     scores = np.zeros(NUM_TRIALS)
     results = {}
@@ -169,16 +169,16 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
 
         # will only retain the MSE (mean + std) corresponding to the model achieving the best score on the train set
         # i.e. the test set is not used to decide the truncation level.
-        hyperparams = list(itertools.product(depths1, depths2))
+        hyperparams = list(itertools.product(depths1, depths2, ncompos1, ncompos2))
         best_scores_train = np.zeros(len(hyperparams))
         MSE_test = np.zeros(len(hyperparams))
         results_tmp = {}
-        for n, (depth1, depth2) in enumerate(hyperparams):
+        for n, (depth1, depth2, ncompo1, ncompo2) in enumerate(hyperparams):
 
-            pwES = pathwiseSketchExpectedSignatureTransform(order=depth1,ncompo=ncompo).fit_transform(X)
-            SpwES = SketchSignatureTransform(order=depth2,ncompo=ncompo).fit_transform(pwES)
+            pwES = pathwiseSketchExpectedSignatureTransform(order=depth1,ncompo=ncompo1).fit_transform(X)
+            SpwES = SketchSignatureTransform(order=depth2,ncompo=ncompo2).fit_transform(pwES)
 
-            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.2,
+            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.3,
                                                                 random_state=i)
 
             # parameter search
@@ -195,7 +195,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
         # pick the model with the best performances on the train set
         best_score = 100000
         index = None
-        for n, (depth1, depth2) in enumerate(hyperparams):
+        for n, (depth1, depth2, ncompo1, ncompo2) in enumerate(hyperparams):
             if (best_scores_train[n] < best_score):
                 best_score = best_scores_train[n]
                 index = n
