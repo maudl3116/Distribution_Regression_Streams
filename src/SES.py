@@ -80,7 +80,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
             pwES = pathwiseExpectedSignatureTransform(order=depth).fit_transform(X)
             SpwES = SignatureTransform(order=depth2).fit_transform(pwES)
 
-            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.3,
+            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.2,
                                                                 random_state=i)
 
             # parameter search
@@ -178,7 +178,7 @@ def model_sketch(X, y, depths1=[2], depths2=[2], ncompos1 = [100], ncompos2 = [1
             pwES = pathwiseSketchExpectedSignatureTransform(order=depth1,ncompo=ncompo1).fit_transform(X)
             SpwES = SketchSignatureTransform(order=depth2,ncompo=ncompo2).fit_transform(pwES)
 
-            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.3,
+            X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.2,
                                                                 random_state=i)
 
             # parameter search
