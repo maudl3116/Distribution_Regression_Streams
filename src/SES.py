@@ -109,7 +109,7 @@ def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, gr
 
 
 
-def model_sketch(X, y, depths1=[2], depths2=[2], ncompos1 = [100], ncompos2 = [100], ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
+def model_sketch(X, y, depths1=[2], depths2=[2], ncompos1 = [100], ncompos2 = [100], rbf=True,alpha=10, ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
     """Performs a Lasso-based distribution regression on ensembles (of possibly unequal cardinality)
        of univariate or multivariate time-series (of possibly unequal lengths)
 
@@ -175,7 +175,7 @@ def model_sketch(X, y, depths1=[2], depths2=[2], ncompos1 = [100], ncompos2 = [1
         results_tmp = {}
         for n, (depth1, depth2, ncompo1, ncompo2) in enumerate(hyperparams):
 
-            pwES = pathwiseSketchExpectedSignatureTransform(order=depth1,ncompo=ncompo1).fit_transform(X)
+            pwES = pathwiseSketchExpectedSignatureTransform(order=depth1,ncompo=ncompo1, rbf=rbf, lengthscale=alpha).fit_transform(X)
             SpwES = SketchSignatureTransform(order=depth2,ncompo=ncompo2).fit_transform(pwES)
 
             X_train, X_test, y_train, y_test = train_test_split(np.array(SpwES), np.array(y), test_size=0.2,
