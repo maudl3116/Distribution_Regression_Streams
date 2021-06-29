@@ -12,6 +12,7 @@ with warnings.catch_warnings():
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import as_float_array
+from sklearn.linear_model import Ridge
 
 import ksig
 
@@ -182,20 +183,7 @@ class pathwiseSketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         self.lr_sig_kernel.fit(np.array(X[0]))
         return self
 
-    def transform(self, X, y=None):
-        # for bag in X:
-        #     # get the lengths of all time series in the bag
-        #     lengths = [item.shape[0] for item in bag]
-        #     if len(list(set(lengths))) == 1:
-        #         # if all time series have the same length, the (pathwise) signatures can be computed in batch
-        #         feat = [self.lr_sig_kernel.transform(np.array(bag)[:,:i,:])[:,None,:] for i in range(2,bag[0].shape[0])]   # list of (Nx1xD) features 
-        #         pwES.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
-
-        #     else:
-        #         error_message = 'All time series in a bag must have the same length'
-        #         raise NameError(error_message)
-
-        # return np.concatenate([x.mean(0)[None,:,:] for x in pwES])  
+    def transform(self, X, y=None): 
         try:
             X = np.array(X)
             X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
@@ -259,6 +247,54 @@ class SketchSignatureTransform(BaseEstimator, TransformerMixin):
         else:
             return [self.lr_sig_kernel.transform(item[None,:,:]) for item in X]
 
+class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
+
+    def __init__(self, order, ncompo, rbf=False, lengthscale=1, lambda_=1):
+        if not isinstance(order, int) or order < 1:
+            raise NameError('The order must be a positive integer.')
+        self.order = order
+        self.ncompo = ncompo
+        self.lambda_ = lambda_
+        if rbf:
+            static_kernel = ksig.static.kernels.RBFKernel(lengthscale=lengthscale) 
+        else:
+            static_kernel = ksig.static.kernels.LinearKernel() 
+        static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
+        proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
+        self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
+
+    def fit(self, X, y=None):
+
+        self.lr_sig_kernel.fit(np.array(X[0]))
+        return self
+
+    def transform(self, X, y=None):
+        try:
+            X = np.array(X)
+            X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
+            feat = [self.lr_sig_kernel.transform(X_[:,:i,:])[:,None,:] for i in range(2,X_.shape[1])] # list of (NMx1xD) features
+            feat = np.concatenate(feat,axis=1) # (NMxLxD)
+            pwS = feat.reshape((X.shape[0],X.shape[1],feat.shape[1],feat.shape[2]))  # (M,N,L,D)
+
+        except:
+            pwS = []
+            for bag in X:
+                feat = [self.lr_sig_kernel.transform(np.array(bag)[:,:i,:])[:,None,:] for i in range(2,bag[0].shape[0])]   # list of (Nx1xD) features 
+                pwS.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
+            pwS = np.array(pwS) #(MxNxLxD) tensor
+        
+        #(pathwise) multitask ridge regression
+        clf = Ridge(alpha=self.lambda_)
+        pwCKMEs = []
+        for i in in range len(X):
+            pwCKME = []
+            for p in range(pwS.shape[2]):
+                clf.fit(pwS[i,:,p,:],pwS[i,:,-1,:])
+                CKME = clf.predict(pwS[i,:,p,:])  # N, D
+                pwCKME.append(CKME[:,None,:])
+            pwCKMEs.append(np.concatenate(pwCKME,axis=1)) # N L D
+
+        return np.array(pwCKME) # M N L D 
 
 if __name__ == "__main__":
     doctest.testmod()
