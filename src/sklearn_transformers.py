@@ -294,7 +294,8 @@ class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
                 pwCKME.append(CKME[:,None,:])
             pwCKMEs.append(np.concatenate(pwCKME,axis=1)) # N L D
 
-        return np.array(pwCKME) # M N L D 
+    
+        return np.array(pwCKMEs) # M N L D 
 
 if __name__ == "__main__":
     doctest.testmod()

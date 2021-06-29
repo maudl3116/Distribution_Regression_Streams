@@ -487,7 +487,8 @@ def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas
     for (depth1,ncompo1, alpha1, lambda_, depth2, ncompo2, alpha2) in hyperparams:
 
         pwCKME = SketchpwCKMETransform(order=depth1, ncompo=ncompo1, rbf=rbf1, lengthscale=alpha1, lambda_=lambda_).fit_transform(X) 
-        ES = SketchExpectedSignatureTransform(order=depth2, ncompo=ncompo2, rbf=rbf2, lengthscale=alpha2).fit_transform(pwCKME)  #(M,D)
+        pwCKME = AddTime().fit_transform(pwCKME)
+        ES = SketchExpectedSignatureTransform(order=depth2, ncompo=ncompo2, rbf=rbf2, lengthscale=alpha2).fit_transform(np.array(pwCKME))  #(M,D)
 
         mmd = -2*ES@ES.T
         mmd += np.diag(mmd)[:,None] + np.diag(mmd)[None,:]
