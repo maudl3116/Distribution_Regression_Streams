@@ -12,6 +12,7 @@ with warnings.catch_warnings():
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import as_float_array
 
+import ksig
 
 class AddTime(BaseEstimator, TransformerMixin):
     # sklearn-type estimator to add time as an extra dimension of a D-dimensional path.
@@ -126,6 +127,38 @@ class pathwiseExpectedSignatureTransform(BaseEstimator, TransformerMixin):
 
         return [x.mean(0) for x in pwES]
 
+class pathwiseSketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
+
+    def __init__(self, order, ncompo):
+        if not isinstance(order, int) or order < 1:
+            raise NameError('The order must be a positive integer.')
+        self.order = order
+        self.ncompo = ncompo
+        static_kernel = ksig.static.kernels.RBFKernel() 
+        static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
+        proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
+        self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
+
+    def fit(self, X, y=None):
+        self.lr_sig_kernel.fit(X)
+        return self
+
+    def transform(self, X, y=None):
+        pwES = []
+        for bag in X:
+            # get the lengths of all time series in the bag
+            lengths = [item.shape[0] for item in bag]
+            if len(list(set(lengths))) == 1:
+                # if all time series have the same length, the (pathwise) signatures can be computed in batch
+                feat = [self.lr_sig_kernel.transform(bag[:,:i,:])[:,None,:] for i in range(bag.shape[1])]   # list of (Nx1xD) features 
+                pwES.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
+                print(np.concatenate(feat,axis=1).shape)
+            else:
+                error_message = 'All time series in a bag must have the same length'
+                raise NameError(error_message)
+
+        return [x.mean(0) for x in pwES]
+
 
 class SignatureTransform(BaseEstimator, TransformerMixin):
 
@@ -145,6 +178,32 @@ class SignatureTransform(BaseEstimator, TransformerMixin):
             return iisignature.sig(X, self.order)
         else:
             return [iisignature.sig(item, self.order) for item in X]
+
+
+class SketchSignatureTransform(BaseEstimator, TransformerMixin):
+
+    def __init__(self, order, ncompo):
+        if not isinstance(order, int) or order < 1:
+            raise NameError('The order must be a positive integer.')
+        self.order = order
+        self.ncompo = ncompo
+        static_kernel = ksig.static.kernels.RBFKernel() 
+        static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
+        proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
+        self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
+
+    def fit(self, X, y=None):
+        self.lr_sig_kernel.fit(X)
+        return self
+
+    def transform(self, X, y=None):
+        # get the lengths of all pathwise expected signatures
+        lengths = [pwES.shape[0] for pwES in X]
+        if len(list(set(lengths))) == 1:
+            # if all pathwise expected signatures have the same length, the signatures can be computed in batch
+            return self.lr_sig_kernel.transform(X)
+        else:
+            return [self.lr_sig_kernel.transform(item[None,:,:]) for item in X]
 
 
 if __name__ == "__main__":
