@@ -104,6 +104,36 @@ class ExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         return [x.mean(0) for x in X]
 
 
+class SketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
+
+    def __init__(self, order, ncompo, rbf=False, lengthscale=1):
+        if not isinstance(order, int) or order < 1:
+            raise NameError('The order must be a positive integer.')
+        self.order = order
+        self.ncompo = ncompo
+        if rbf:
+            static_kernel = ksig.static.kernels.RBFKernel(lengthscale=lengthscale) 
+        else:
+            static_kernel = ksig.static.kernels.LinearKernel() 
+        static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
+        proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
+        self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
+
+    def fit(self, X, y=None):
+        self.lr_sig_kernel.fit(np.array(X[0]))
+        return self
+
+    def transform(self, X, y=None):
+        X = np.array(X)
+        X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
+        feat = self.lr_sig_kernel.transform(X_) 
+        feat = np.concatenate(feat,axis=1) # (NMxD)
+        ES = feat.reshape((X.shape[0],X.shape[1],feat.shape[2]))  # (M,N,D)
+        ES = np.concatenate([x.mean(0)[None,:] for x in ES]) 
+        print(ES.shape)
+        return ES 
+
+
 class pathwiseExpectedSignatureTransform(BaseEstimator, TransformerMixin):
 
     def __init__(self, order):
@@ -130,13 +160,15 @@ class pathwiseExpectedSignatureTransform(BaseEstimator, TransformerMixin):
 
 class pathwiseSketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
 
-    def __init__(self, order, ncompo):
+    def __init__(self, order, ncompo, rbf=False, lengthscale=1):
         if not isinstance(order, int) or order < 1:
             raise NameError('The order must be a positive integer.')
         self.order = order
         self.ncompo = ncompo
-        static_kernel = ksig.static.kernels.RBFKernel(lengthscale=10) 
-        # static_kernel = ksig.static.kernels.LinearKernel() 
+        if rbf:
+            static_kernel = ksig.static.kernels.RBFKernel(lengthscale=lengthscale) 
+        else:
+            static_kernel = ksig.static.kernels.LinearKernel() 
         static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
         proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
         self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
