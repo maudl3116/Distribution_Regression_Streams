@@ -286,7 +286,7 @@ class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
         #(pathwise) multitask ridge regression
         clf = Ridge(alpha=self.lambda_)
         pwCKMEs = []
-        for i in in range len(X):
+        for i in range(len(X)):
             pwCKME = []
             for p in range(pwS.shape[2]):
                 clf.fit(pwS[i,:,p,:],pwS[i,:,-1,:])
