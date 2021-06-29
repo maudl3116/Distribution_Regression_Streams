@@ -119,7 +119,7 @@ def model(X, y, alphas=[0.5], rbf=True, dyadic_order=1, ll=None, at=False, mode=
         MSE_test = np.zeros(len(alphas))
         results_tmp = {}
         models = []
-        for n,(scale1, scale2, lambda_) in enumerate(alphas):
+        for n,alpha in enumerate(alphas):
             
             ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.3,
                                                                 random_state=i)
