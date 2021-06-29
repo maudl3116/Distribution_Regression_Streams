@@ -183,7 +183,6 @@ class pathwiseSketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        pwES = []
         # for bag in X:
         #     # get the lengths of all time series in the bag
         #     lengths = [item.shape[0] for item in bag]
@@ -197,12 +196,19 @@ class pathwiseSketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
         #         raise NameError(error_message)
 
         # return np.concatenate([x.mean(0)[None,:,:] for x in pwES])  
-        X = np.array(X)
-        X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
-        feat = [self.lr_sig_kernel.transform(X_[:,:i,:])[:,None,:] for i in range(2,X_.shape[1])] # list of (NMx1xD) features
-        feat = np.concatenate(feat,axis=1) # (NMxLxD)
-        pwES = feat.reshape((X.shape[0],X.shape[1],feat.shape[1],feat.shape[2]))  # (M,N,L,D)
-        pwES = np.concatenate([x.mean(0)[None,:,:] for x in pwES]) 
+        try:
+            X = np.array(X)
+            X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
+            feat = [self.lr_sig_kernel.transform(X_[:,:i,:])[:,None,:] for i in range(2,X_.shape[1])] # list of (NMx1xD) features
+            feat = np.concatenate(feat,axis=1) # (NMxLxD)
+            pwES = feat.reshape((X.shape[0],X.shape[1],feat.shape[1],feat.shape[2]))  # (M,N,L,D)
+            pwES = np.concatenate([x.mean(0)[None,:,:] for x in pwES]) 
+        except:
+            pwES = []
+            for bag in X:
+                feat = [self.lr_sig_kernel.transform(np.array(bag)[:,:i,:])[:,None,:] for i in range(2,bag[0].shape[0])]   # list of (Nx1xD) features 
+                pwES.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
+            pwES = np.concatenate([x.mean(0)[None,:,:] for x in pwES]) 
         print(pwES.shape)
         return pwES 
 
