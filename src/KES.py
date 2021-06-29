@@ -121,7 +121,7 @@ def model(X, y, alphas=[0.5], rbf=True, dyadic_order=1, ll=None, at=False, mode=
         models = []
         for n,alpha in enumerate(alphas):
             
-            ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.3,
+            ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.2,
                                                                 random_state=i)
             
 
@@ -252,7 +252,7 @@ def model_sketch(X, y, alphas=[0.5], depths=[2], ncompos = [100], rbf=True, dyad
         models = []
         for n,(alpha, depth, ncompo) in enumerate(hyperparams):
             
-            ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.3,
+            ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.2,
                                                                 random_state=i)
             
 
@@ -400,7 +400,7 @@ def model_higher_rank(X, y, alphas0=[0.5], alphas1=[0.5], lambdas=[0.1], rbf=Tru
         models = []
         for n,(scale1, scale2, lambda_) in enumerate(hyperparams):
             
-            ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.3,
+            ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.2,
                                                                 random_state=i)
             
             # building the estimator
