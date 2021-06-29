@@ -435,7 +435,7 @@ def model_higher_rank(X, y, alphas0=[0.5], alphas1=[0.5], lambdas=[0.1], rbf=Tru
     return scores.mean(), scores.std(), results
 
 
-def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas1=[1], lambda_=[10], depths2=[2], ncompos2=[20], rbf2=True, alphas2=[1], ll=None, at=False,  NUM_TRIALS=1, cv=3, grid={}):
+def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas1=[1], lambdas_=[10], depths2=[2], ncompos2=[20], rbf2=True, alphas2=[1], ll=None, at=False,  NUM_TRIALS=1, cv=3, grid={}):
     """Performs a kernel based distribution classification on ensembles (of possibly unequal cardinality)
        of univariate or multivariate time-series (of possibly unequal lengths)
        We use the RBF embedding throughout. 
@@ -482,9 +482,9 @@ def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas
     clf = KernelRidge
 
     list_kernels = []
-    hyperparams = list(itertools.product(depths1,ncompos1, rbf1, alphas1, lambda_, depths2, ncompos2, rbf2, alphas2))
+    hyperparams = list(itertools.product(depths1,ncompos1, alphas1, lambdas_, depths2, ncompos2, alphas2))
     # Precompute the Gram matrices for the different scaling parameters, to avoid recomputing them for each grid search step
-    for (depth1,ncompo1, rbf1, alpha1, lambda_, depth2, ncompo2, rbf2, alpha2) in hyperparams:
+    for (depth1,ncompo1, alpha1, lambda_, depth2, ncompo2, alpha2) in hyperparams:
 
         pwCMKE = SketchpwCKMETransform(order=depth1, ncompo=ncompo1, rbf=rbf1, lengthscale=alpha1, lambda_=lambda_).fit_transform(X) 
         ES = SketchExpectedSignatureTransform(order=depth2, ncompo=ncompo2, rbf=rbf2, lengthscale=alpha2).fit_transform(pwCKME)  #(M,D)
@@ -512,7 +512,7 @@ def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas
         MSE_test = np.zeros(len(hyperparams))
         results_tmp = {}
         models = []
-        for n,(depth1,ncompo1, rbf1, alpha1, lambda_, depth2, ncompo2, rbf2, alpha2) in enumerate(hyperparams):
+        for n,(depth1,ncompo1, alpha1, lambda_, depth2, ncompo2, alpha2) in enumerate(hyperparams):
             
             ind_train, ind_test, y_train, y_test = train_test_split(np.arange(len(y)), np.array(y), test_size=0.2,
                                                                 random_state=i)
@@ -536,7 +536,7 @@ def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas
         # pick the model with the best performances on the train set
         best_score = 100000
         index = None
-        for n,(depth1,ncompo1, rbf1, alpha1, lambda_, depth2, ncompo2, rbf2, alpha2) in enumerate(hyperparams):
+        for n,(depth1,ncompo1, alpha1, lambda_, depth2, ncompo2, alpha2) in enumerate(hyperparams):
             if (best_scores_train[n] < best_score):
                 best_score = best_scores_train[n]
                 index = n
