@@ -126,8 +126,8 @@ class SketchExpectedSignatureTransform(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X = np.array(X)
         X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
-        feat = self.lr_sig_kernel.transform(X_) 
-        ES = feat.reshape((X.shape[0],X.shape[1],feat.shape[2]))  # (M,N,D)
+        feat = self.lr_sig_kernel.transform(X_)   #(NM, D)
+        ES = feat.reshape((X.shape[0],X.shape[1],feat.shape[1]))  # (M,N,D)
         ES = np.concatenate([x.mean(0)[None,:] for x in ES]) 
         print(ES.shape)
         return ES 
