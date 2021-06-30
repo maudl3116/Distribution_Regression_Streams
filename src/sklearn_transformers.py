@@ -261,7 +261,7 @@ class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
             static_kernel = ksig.static.kernels.LinearKernel() 
         static_feat = ksig.static.features.NystroemFeatures(static_kernel, n_components=ncompo)
         proj = ksig.projections.CountSketchRandomProjection(n_components=ncompo)
-        self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernel(n_levels=order, static_features=static_feat, projection=proj)
+        self.lr_sig_kernel = ksig.kernels.LowRankSignatureKernelPathwise(n_levels=order, static_features=static_feat, projection=proj)
 
     def fit(self, X, y=None):
 
@@ -272,15 +272,18 @@ class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
         try:
             X = np.array(X)
             X_ = X.reshape((-1,X.shape[2],X.shape[3]))   #(NM, L, D)
-            feat = [self.lr_sig_kernel.transform(X_[:,:i,:])[:,None,:] for i in range(2,X_.shape[1])] # list of (NMx1xD) features
-            feat = np.concatenate(feat,axis=1) # (NMxLxD)
+            # feat = [self.lr_sig_kernel.transform(X_[:,:i,:])[:,None,:] for i in range(2,X_.shape[1])] # list of (NMx1xD) features
+            # feat = np.concatenate(feat,axis=1) # (NMxLxD)
+            feat = self.lr_sig_kernel.transform(X_) #(NM, L, D)
             pwS = feat.reshape((X.shape[0],X.shape[1],feat.shape[1],feat.shape[2]))  # (M,N,L,D)
 
         except:
             pwS = []
             for bag in X:
-                feat = [self.lr_sig_kernel.transform(np.array(bag)[:,:i,:])[:,None,:] for i in range(2,bag[0].shape[0])]   # list of (Nx1xD) features 
-                pwS.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
+                # feat = [self.lr_sig_kernel.transform(np.array(bag)[:,:i,:])[:,None,:] for i in range(2,bag[0].shape[0])]   # list of (Nx1xD) features 
+                # pwS.append(np.concatenate(feat,axis=1))   # list of (NxLxD) tensors
+                feat = self.lr_sig_kernel.transform(np.array(bag))
+                pwS.append(feat)
             pwS = np.array(pwS) #(MxNxLxD) tensor
         
         #(pathwise) multitask ridge regression
