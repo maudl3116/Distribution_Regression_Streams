@@ -289,12 +289,29 @@ class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
         #(pathwise) multitask ridge regression
         clf = Ridge(alpha=self.lambda_)
         pwCKMEs = []
+
+
+        
+        T = torch.tensor(pwS).cuda()  #(M,N,L,D)
+
+
         for i in range(len(X)):
+            to_inv = torch.zeros((T.shape[2], T.shape[3], T.shape[3]), dtype=T.dtype, device=T.device)
+            for p in range(pwS.shape[2]):
+                to_inv[p,:,:] = torch.matmul(T[i,:,p,:].t(),T[i,:,p,:])
+            to_inv+= self.lambda_*torch.eye(T.shape[3],dtype=T.dtype, device=T.device)[None,:,:]
+            inv = torch.linalg.inv(to_inv)
             pwCKME = []
             for p in range(pwS.shape[2]):
-                clf.fit(pwS[i,:,p,:],pwS[i,:,-1,:])
-                CKME = clf.predict(pwS[i,:,p,:])  # N, D
-                pwCKME.append(CKME[:,None,:])
+                X = T[i,:,p,:]
+                y = T[i,:,-1,:]
+
+                CKME = torch.matmul(X,inv[p,:,:])
+                Xy = torch.matmul(X.t(),y)
+                CKME = torch.matmul(CKME,Xy)
+                #clf.fit(pwS[i,:,p,:],pwS[i,:,-1,:])
+                #CKME = clf.predict(pwS[i,:,p,:])  # N, D
+                pwCKME.append(CKME[:,None,:].cpu().numpy())
             pwCKMEs.append(np.concatenate(pwCKME,axis=1)) # N L D
 
     

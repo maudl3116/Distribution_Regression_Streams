@@ -7,6 +7,11 @@ The functions have been from a class implementing matplotlib.animation.TimedAnim
 from __future__ import division, print_function
 import numpy as np
 import types
+from utils import cache_result
+import hashlib
+import json
+import os
+import pickle
 
 k_B = 1.380648e-23  # boltzmann contant (J/K)
 
@@ -202,3 +207,72 @@ class Sim():
 
 def V_(t, V0=1, Vf=10, t_max=5):
     return V0 + (Vf - V0) * t / t_max
+
+
+class DatasetParticles():
+    """
+    Class for computing the path signatures.
+    """
+
+    def __init__(self, M, N, L, ymin, ymax, radius, max_time = 2, dt = 0.01, V=3):
+        """
+        Parameters
+        ----------
+        dataset : string
+            Name of the dataset
+        dataset_type: string
+            Whether it is the train, validation or the test set
+        truncation_level : int
+            Path signature trucation level.
+        add_time: bool
+            Whether add time was applied
+        lead_lag_transformation : bool
+            Whether lead-lag was applied.
+        """
+        self.name = Particles
+        self.M = M 
+        self.N = N 
+        self.ymin = ymin 
+        self.ymax = ymax
+        self.V = V
+        self.radius = radius*self.(V/self.N)**(1./3)
+        self.dt = 0.01
+        self.max_time = L*self.dt
+
+
+    @cache_result
+    def generate(self):
+        X = []
+        temperatures = np.array((self.ymax-self.ymin)*np.random.rand(self.M)+self.ymin)
+        gases = []
+
+        for temp in tqdm(temperatures):
+            Gas = Sim(self.N, self.radius, temp, self.V, self.max_time, self.dt)
+            
+            # To store the trajectories
+            trajectories = [[] for i in range(self.N)]
+
+            for t in np.linspace(0, Gas.max_time, Gas.Nt):
+                positions = Gas._draw_frame(t)
+                for i in range(len(trajectories)):
+                    # update particle i
+                    trajectories[i].append(list(positions[i]))
+            trajectories = [np.array(particle) for particle in trajectories]
+            
+            gases.append(trajectories)
+        return [gases, temperatures/self.ymax]
+
+    def __str__(self):
+        """
+        Convert object to string. Used in conjunction with cache_result().
+        """
+        return str((self.name
+                    self.M,
+                    self.N,
+                    self.ymin,
+                    self.ymax,
+                    self.radius,
+                    self.max_time,
+                    self.dt
+                    self.V))
+

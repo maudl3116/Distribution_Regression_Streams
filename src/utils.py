@@ -1,6 +1,11 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
+import hashlib
+import json
+import os
+import pickle
+
 class AddTime(BaseEstimator, TransformerMixin):
     # sklearn-type estimator to add time as an extra dimension of a D-dimensional path.
     # Note that the input must be a list of arrays (i.e. a list of D-dimensional paths)
@@ -154,3 +159,42 @@ def mape(results):
         true = results[i]['true']
         mape_vec[i]=np.mean(np.abs((true - pred) / true))*100 
     return np.mean(mape_vec), np.std(mape_vec)
+
+def cache_result(function_to_cache, cache_directory='data'):
+    """
+    Cache the result of calling function_to_cache().
+    """
+    if not os.path.isdir(cache_directory):
+        os.mkdir(cache_directory)
+
+    def _read_result(parameter_hash):
+        cache_file = os.path.join(cache_directory, str(parameter_hash))
+        if os.path.exists(cache_file):
+            with open(cache_file, 'rb') as file:
+                return pickle.load(file)
+        return None
+
+    def _write_result(parameter_hash, result):
+        cache_file = os.path.join(cache_directory, str(parameter_hash))
+        with open(cache_file, 'wb') as file:
+            pickle.dump(result, file)
+
+    def wrapper_function(*args, **kwargs):
+        # Aggregate all parameters passed to function_to_cache.
+        # Note that args[0] will contain an instance of ExpectedSignatureCalculator(), which
+        # we subsequently convert to a string. In this way, we cache results, while
+        # considering values of constants and the truncation level.
+        parameters = args + tuple(kwargs[k] for k in sorted(kwargs.keys()))
+        # Map aggregated parameters to an MD5 hash.
+        parameter_hash = hashlib.md5(json.dumps(parameters, sort_keys=True,
+                                                default=str).encode('utf-8')).hexdigest()
+
+        result = _read_result(parameter_hash)
+        if result is None:
+            # Call function_to_cache if no cached result is available
+            result = function_to_cache(*args, **kwargs)
+            _write_result(parameter_hash, result)
+
+        return result
+
+    return wrapper_function
