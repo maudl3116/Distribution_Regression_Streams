@@ -74,8 +74,6 @@ class _VaryItems(_DefaultConfigRoughVol):
 #   algos: Iterable[str] = ('RBF', 'KES', 'KESFast', 'KesHigher','KesHigherFast', 'SES', 'SESFast')
   algos: Iterable[str] = ('KESFast', 'SES')
   dataset__nb_items: Iterable[int] = (25,50,75,100)
-  ll=[0]
-  at=True 
 
 
 # KESRoughVol = _VaryItems(
@@ -87,7 +85,11 @@ KESFastRoughVol = _VaryItems(
   KESFast__alphas =[5,10,15],
   KESFast__depths = [4],
   KESFast__ncompos = [100],
-  KESFast__rbf =True
+  KESFast__rbf =True,
+  ll=[0],
+  at=True,
+  cv = 3,
+  num_trials = 5
  )
 
 # KESHigerFastRoughVol = _VaryItems(

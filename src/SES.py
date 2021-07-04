@@ -10,7 +10,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
 from sklearn.pipeline import Pipeline
 import itertools
-import ksig
 
 def model(X, y, depths1=[2], depth2=2, ll=None, at=False, NUM_TRIALS=5, cv=3, grid={}):
     """Performs a Lasso-based distribution regression on ensembles (of possibly unequal cardinality)
