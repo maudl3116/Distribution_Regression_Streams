@@ -1,3 +1,7 @@
+import sys
+sys.path.append('Distribution_Regression_Streams/KSig')
+import ksig
+
 import numpy as np
 import copy
 import random
@@ -13,8 +17,6 @@ with warnings.catch_warnings():
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import as_float_array
 from sklearn.linear_model import Ridge
-
-import ksig
 
 class AddTime(BaseEstimator, TransformerMixin):
     # sklearn-type estimator to add time as an extra dimension of a D-dimensional path.
@@ -287,7 +289,7 @@ class SketchpwCKMETransform(BaseEstimator, TransformerMixin):
             pwS = np.array(pwS) #(MxNxLxD) tensor
         
         #(pathwise) multitask ridge regression
-        clf = Ridge(alpha=self.lambda_)
+        # clf = Ridge(alpha=self.lambda_)
         pwCKMEs = []
 
 

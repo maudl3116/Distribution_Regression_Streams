@@ -1,15 +1,20 @@
-from src import KES, SES, DR_RBF  
-from src import utils
+import sys
+import os 
+sys.path.append('Distribution_Regression_Streams/src')
+import KES, SES, DR_RBF  
+import utils_particles, utils_roughvol
+import utils
 from absl import app
 import configs_getter
+import csv
 import time 
 import itertools
 #TODO: iterate better config parameters
 #TODO: read and plot results
 
 _DATASETS = {
-    "Particles": utils.utils_particles.DatasetParticles, 
-    "RoughVol": utils.utils_roughvol.DatasetRoughVol,  
+    "Particles": utils_particles.DatasetParticles, 
+    "RoughVol": utils_roughvol.DatasetRoughVol,  
 }
 
 _ALGOS = {
@@ -49,8 +54,8 @@ def _run_algos():
     for params in combinations:                                     
         tmp_file_path = os.path.join(tmp_dirpath, str(tmp_files_idx))
         tmp_files_idx += 1
-
-        [X,y] = _DATASETS[params[1]](*params[2:]).generate()  
+        generator = _DATASETS[params[1]](*params[2:])
+        [X,y] = generator.generate()  
  
         _run_algo(tmp_file_path, [X,y], *params, config)  #TODO: need to send (1) dataset spec (2) all params for the algorithm
 
