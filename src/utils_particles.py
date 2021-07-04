@@ -235,7 +235,7 @@ class DatasetParticles():
         self.ymin = ymin 
         self.ymax = ymax
         self.V = V
-        self.radius = radius*self.(V/self.N)**(1./3)
+        self.radius = radius*(self.V/self.N)**(1./3)
         self.dt = 0.01
         self.max_time = L*self.dt
 
@@ -266,13 +266,13 @@ class DatasetParticles():
         """
         Convert object to string. Used in conjunction with cache_result().
         """
-        return str((self.name
+        return str((self.name,
                     self.M,
                     self.N,
                     self.ymin,
                     self.ymax,
                     self.radius,
                     self.max_time,
-                    self.dt
+                    self.dt,
                     self.V))
 

@@ -1,7 +1,9 @@
 from src import KES, SES, DR_RBF  
 from src import utils
 from absl import app
-
+import configs_getter
+import time 
+import itertools
 #TODO: iterate better config parameters
 #TODO: read and plot results
 
@@ -13,10 +15,10 @@ _DATASETS = {
 _ALGOS = {
     "KES": KES.model,            
     "KESFast": KES.model_sketch,
-    "KESHigher": KES.model_higher_rank
+    "KESHigher": KES.model_higher_rank,
     "KESHigherFast": KES.model_higher_rank_sketch,
-    "SES": SES.,
-    "SESFast": SES_sketch,
+    "SES": SES.model,
+    "SESFast": SES.model_sketch,
     "RBF": DR_RBF.model
 }
 
@@ -32,7 +34,7 @@ def _run_algos():
                        f'{int(time.time()*1000)}.csv')
   tmp_dirpath = f'{fpath}.tmp_results'
   os.makedirs(tmp_dirpath, exist_ok=True)
-  atexit.register(shutil.rmtree, tmp_dirpath)
+#   atexit.register(shutil.rmtree, tmp_dirpath)
   tmp_files_idx = 0
 
   for config_name, config in configs_getter.get_configs():          
@@ -47,7 +49,9 @@ def _run_algos():
     for params in combinations:                                     
         tmp_file_path = os.path.join(tmp_dirpath, str(tmp_files_idx))
         tmp_files_idx += 1
-        [X,y] = _DATASETS[config.datasets](*params[1:]).generate()     
+
+        [X,y] = _DATASETS[params[1]](*params[2:]).generate()  
+ 
         _run_algo(tmp_file_path, [X,y], *params, config)  #TODO: need to send (1) dataset spec (2) all params for the algorithm
 
   print(f'Writing results to {fpath}...')                           
@@ -160,7 +164,7 @@ def main(argv):
 
   try:
       filepath = _run_algos()
-      
+
   except Exception as e:
     print('ERROR\n{}'.format(e))
 

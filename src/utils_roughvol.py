@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import pickle
+import tqdm
 
 def fOU_generator(a,n=0.3,h=0.2,length=300):
     
@@ -55,7 +56,7 @@ class DatasetRoughVol():
         y = np.array((self.ymax-self.ymin)*np.random.rand(self.M)+self.ymin)
         for a in tqdm(y):
             intermediate = []
-            for n in range(N):
+            for n in range(self.N):
                 path = np.exp(fOU_generator(a, length=self.L)).reshape(-1,1)
                 intermediate.append(path)
             X.append(intermediate)
