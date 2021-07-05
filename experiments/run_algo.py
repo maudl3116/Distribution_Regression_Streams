@@ -91,7 +91,7 @@ def _run_algo(
   # send the correct set of hyperparameters 
   if algo in ['KES']:  
       try:
-        mean, stdv, results  = _ALGOS[algo](X,y, alphas=config.KES__alphas, ll=config.ll, at=config.at,  NUM_TRIALS=config.num_trials,  cv=config.cv)
+        mean, stdv, results  = _ALGOS[algo](X,y, alphas=config.KES__alphas, rbf = config.KES__rbf, dyadic_order = config.KES__dyadic_order, ll=config.ll, at=config.at,  NUM_TRIALS=config.num_trials,  cv=config.cv)
       except BaseException as err:
         if fail_on_error:
             raise

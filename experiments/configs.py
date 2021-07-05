@@ -25,6 +25,8 @@ class _DefaultConfig:
   # TODO: hyperparameters should not be iterables 
 #   RBF__ : 
   KES__alphas :  Iterable[float] = ((1e-1,1e0,1e1,1e2),)  #TODO: KES should have rbf and others
+  KES__rbf: Iterable[bool] = (True,)
+  KES__dyadic_order: Iterable[int] = (1,)
   KESFast__alphas : Iterable[float] = ((1e-1,1e0,1e1,1e2),)
   KESFast__depths : Iterable[int] = (4,)
   KESFast__ncompos : Iterable[int] = (100,)
@@ -76,9 +78,16 @@ class _VaryItems(_DefaultConfigRoughVol):
   dataset__nb_items: Iterable[int] = (25,50,75,100)
 
 
-# KESRoughVol = _VaryItems(
-     
-#  )
+KESRoughVol = _VaryItems(
+  KES__alphas = [10,20],    
+  KES__rbf = True,
+  KES__dyadic_order = 0,
+  algos = ['KES'],
+  ll=[0],
+  at=True,
+  cv = 3,
+  num_trials = 5   
+ )
 
 KESFastRoughVol = _VaryItems(
   algos = ['KESFast'],
