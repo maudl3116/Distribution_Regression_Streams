@@ -1,7 +1,7 @@
 import sys
 import os 
 sys.path.append('Distribution_Regression_Streams/src')
-import KES, SES, DR_RBF  
+import KES, SES, DR_RBF, DR_FDA  
 import utils_particles, utils_roughvol
 import utils
 from absl import app
@@ -18,6 +18,7 @@ _DATASETS = {
 }
 
 _ALGOS = {
+    "FDA": DR_FDA.model,     
     "KES": KES.model,            
     "KESFast": KES.model_sketch,
     "KESHigher": KES.model_higher_rank,
@@ -89,6 +90,14 @@ def _run_algo(
   print(dataset, algo, '... ', end="")
   X, y = data[0], data[1]
   # send the correct set of hyperparameters 
+  if algo in ['FDA']:  
+      try:
+        mean, stdv, results  = _ALGOS[algo](X,y, name = config.FDA__name, alphas=config.FDA__alphas, ll=config.ll, at=config.at,  NUM_TRIALS=config.num_trials,  cv=config.cv)
+      except BaseException as err:
+        if fail_on_error:
+            raise
+        print(err)
+        return
   if algo in ['KES']:  
       try:
         mean, stdv, results  = _ALGOS[algo](X,y, alphas=config.KES__alphas, rbf = config.KES__rbf, dyadic_order = config.KES__dyadic_order, ll=config.ll, at=config.at,  NUM_TRIALS=config.num_trials,  cv=config.cv)

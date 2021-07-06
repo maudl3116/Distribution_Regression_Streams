@@ -156,7 +156,7 @@ def model(X, y, alphas=[0.5], rbf=True, dyadic_order=1, ll=None, at=False, mode=
         print('best mse score (cv on the train set): ', best_scores_train[index])
     return scores.mean(), scores.std(), results
 
-def model_sketch(X, y, alphas=[0.5], depths=[2], ncompos = [100], rbf=True, dyadic_order=1, ll=None, at=False, mode='krr', NUM_TRIALS=1, cv=3, grid={}):
+def model_sketch(X, y, k2='rbf', alphas=[0.5], depths=[2], ncompos = [100], rbf=True, dyadic_order=1, ll=None, at=False, mode='krr', NUM_TRIALS=1, cv=3, grid={}):
     """Performs a kernel based distribution regression on ensembles (of possibly unequal cardinality)
        of univariate or multivariate time-series (of possibly unequal lengths)
        Input:
@@ -257,7 +257,7 @@ def model_sketch(X, y, alphas=[0.5], depths=[2], ncompos = [100], rbf=True, dyad
             
 
             # building the estimator
-            pipe = Pipeline([('rbf_mmd', RBF_Sig_MMD_Kernel(K_full=list_kernels[n])),
+            pipe = Pipeline([('rbf_mmd', RBF_Sig_MMD_Kernel(K_full=list_kernels[n],k2=k2)),
                     ('clf', clf())
                     ])
             # parameter search
@@ -489,10 +489,11 @@ def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas
         pwCKME = SketchpwCKMETransform(order=depth1, ncompo=ncompo1, rbf=rbf1, lengthscale=alpha1, lambda_=lambda_).fit_transform(X) 
         pwCKME = AddTime().fit_transform(pwCKME)
         ES = SketchExpectedSignatureTransform(order=depth2, ncompo=ncompo2, rbf=rbf2, lengthscale=alpha2).fit_transform(np.array(pwCKME))  #(M,D)
-
-        mmd = -2*ES@ES.T
-        mmd += np.diag(mmd)[:,None] + np.diag(mmd)[None,:]
-
+        if k2=='rbf':
+            mmd = -2*ES@ES.T
+            mmd += np.diag(mmd)[:,None] + np.diag(mmd)[None,:]
+        elif k2=='lin':
+            mmd = ES@ES.T
         if np.isnan(mmd).any():
             list_kernels.append(np.eye(len(X)))
         else:
@@ -553,14 +554,18 @@ def model_higher_rank_sketch(X, y, depths1=[2], ncompos1=[20], rbf1=True, alphas
 
 
 class RBF_Sig_MMD_Kernel(BaseEstimator, TransformerMixin):
-    def __init__(self, K_full=None,gamma=1.0):
+    def __init__(self, K_full=None,gamma=1.0,k2='rbf'):
         super(RBF_Sig_MMD_Kernel, self).__init__()
         self.gamma = gamma
         self.K_full = K_full
+        self.k2 = k2
 
     def transform(self, X):
         K = self.K_full[X][:,self.ind_train].copy()
-        return np.exp(-self.gamma*K) 
+        if self.k2 =='rbf':
+            return np.exp(-self.gamma*K) 
+        elif self.k2=='lin':
+            return self.gamma*K
 
     def fit(self, X, y=None, **fit_params):
         self.ind_train = X

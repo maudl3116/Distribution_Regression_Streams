@@ -229,7 +229,7 @@ class DatasetParticles():
         lead_lag_transformation : bool
             Whether lead-lag was applied.
         """
-        self.name = Particles
+        self.name = 'Particles'
         self.M = M 
         self.N = N 
         self.ymin = ymin 
